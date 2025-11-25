@@ -76,19 +76,20 @@ python air_quality_pipeline.py --continuous --interval 1800
 
 ### Fetch Data for All Delhi Sites
 
-Fetch air quality data for all 7 predefined Delhi monitoring sites:
+Fetch air quality data for every Delhi monitoring site listed in `Data_SIH_2025/lat_lon_sites.txt` (the pipeline will automatically look in `models/` and `Backend/` for the file, but you can point to a custom file as well):
 
 ```bash
-python air_quality_pipeline.py --multiple
+python air_quality_pipeline.py --multiple [--sites-file path/to/lat_lon_sites.txt]
 ```
 
-Or use the dedicated script:
+Or use the dedicated script (also supports `--sites-file` plus `--output`):
 
 ```bash
 python fetch_all_sites.py
+python fetch_all_sites.py --sites-file ../models/Data_SIH_2025/lat_lon_sites.txt --output my_sites.json
 ```
 
-This will fetch data for all 7 sites:
+If no external file is supplied, the pipeline falls back to the 7 default Delhi locations:
 - Site 1: 28.69536°N, 77.18168°E
 - Site 2: 28.5718°N, 77.07125°E
 - Site 3: 28.58278°N, 77.23441°E
@@ -97,7 +98,7 @@ This will fetch data for all 7 sites:
 - Site 6: 28.72954°N, 77.09601°E
 - Site 7: 28.71052°N, 77.24951°E
 
-The results will be saved to `delhi_all_sites_air_quality.json`.
+The results will be saved to `delhi_all_sites_air_quality.json` (or whatever you pass to `--output`).
 
 ### Fetch Data by Coordinates
 
@@ -137,7 +138,7 @@ The pipeline extracts the following information:
 
 ## Output Format
 
-The pipeline outputs JSON data with the following structure:
+The pipeline outputs JSON data with the following structure (now enriched with a snapshot of any model features the WAQI feed can provide, such as current year/month/day/hour plus O3/NO2/T/humidity/wind):
 
 ```json
 {
@@ -153,7 +154,7 @@ The pipeline outputs JSON data with the following structure:
     "overall_aqi": 150,
     "measurement_time": "2024-01-15 10:00:00",
     "timezone": "+05:30",
-            "concentrations": {
+    "concentrations": {
       "no2": {
         "value": 45,
         "unit": "µg/m³",
@@ -164,6 +165,17 @@ The pipeline outputs JSON data with the following structure:
         "unit": "µg/m³",
         "available": true
       }
+    },
+    "available_features": {
+      "year": 2024,
+      "month": 1,
+      "day": 15,
+      "hour": 10,
+      "O3_forecast": 120,
+      "NO2_forecast": 45,
+      "T_forecast": 22.5,
+      "q_forecast": 48.9,
+      "w_forecast": 1.4
     }
   }
 }

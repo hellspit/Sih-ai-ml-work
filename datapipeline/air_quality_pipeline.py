@@ -3,16 +3,157 @@ Real-time Air Quality Data Pipeline for Delhi
 Fetches live NO2 and O3 (Ozone) concentrations from World Air Quality Index API
 """
 
-import requests
 import json
+import os
+import re
 import time
 from datetime import datetime
-from typing import Dict, Optional, Any
-import os
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import requests
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+
+DEFAULT_DELHI_SITES = [
+    {"site": 1, "latitude": 28.69536, "longitude": 77.18168},
+    {"site": 2, "latitude": 28.5718, "longitude": 77.07125},
+    {"site": 3, "latitude": 28.58278, "longitude": 77.23441},
+    {"site": 4, "latitude": 28.82286, "longitude": 77.10197},
+    {"site": 5, "latitude": 28.53077, "longitude": 77.27123},
+    {"site": 6, "latitude": 28.72954, "longitude": 77.09601},
+    {"site": 7, "latitude": 28.71052, "longitude": 77.24951}
+]
+
+
+def _default_sites_file_candidates() -> List[Path]:
+    """Return possible locations for the lat/lon file."""
+    repo_root = Path(__file__).resolve().parents[1]
+    candidates = [
+        repo_root / "models" / "Data_SIH_2025" / "lat_lon_sites.txt",
+        repo_root / "Backend" / "Data_SIH_2025" / "lat_lon_sites.txt",
+        repo_root / "Backend" / "app" / "Data_SIH_2025" / "lat_lon_sites.txt",
+    ]
+    # Keep order but drop duplicates
+    seen = set()
+    unique_candidates = []
+    for cand in candidates:
+        if cand not in seen:
+            unique_candidates.append(cand)
+            seen.add(cand)
+    return unique_candidates
+
+
+def _parse_sites_file(file_path: Path) -> List[Dict[str, float]]:
+    """Parse lat/lon file into the format expected by the pipeline."""
+    sites: List[Dict[str, float]] = []
+    with open(file_path, encoding="utf-8") as f:
+        for raw_line in f:
+            line = raw_line.strip()
+            if not line or line.lower().startswith("site"):
+                continue
+            parts = re.split(r"[,\s]+", line)
+            if len(parts) < 3:
+                continue
+            try:
+                site_id = int(parts[0])
+            except ValueError:
+                site_id = len(sites) + 1
+            try:
+                lat = float(parts[1])
+                lng = float(parts[2])
+            except ValueError as exc:
+                raise ValueError(f"Invalid coordinates in {file_path}: {line}") from exc
+            sites.append({"site": site_id, "latitude": lat, "longitude": lng})
+    if not sites:
+        raise ValueError(f"No site coordinates found in {file_path}")
+    return sites
+
+
+def load_site_coordinates(file_path: Optional[str] = None) -> List[Dict[str, float]]:
+    """
+    Load site coordinates either from a provided path or from known defaults.
+    Falls back to the baked-in list if no file is available.
+    """
+    candidates: List[Path] = []
+    if file_path:
+        candidates.append(Path(file_path).expanduser())
+    candidates.extend(_default_sites_file_candidates())
+
+    for candidate in candidates:
+        if not candidate.exists():
+            continue
+        try:
+            sites = _parse_sites_file(candidate)
+            print(f"Loaded {len(sites)} site coordinates from {candidate}")
+            return sites
+        except Exception as exc:
+            print(f"Warning: failed to parse {candidate}: {exc}")
+
+    print("Warning: falling back to built-in Delhi site coordinates")
+    # Return a shallow copy so callers can mutate safely
+    return [dict(site) for site in DEFAULT_DELHI_SITES]
+
+
+def _get_iaqi_value(iaqi: Dict[str, Any], key: str) -> Optional[float]:
+    """Safely extract individual AQI value."""
+    value_obj = iaqi.get(key)
+    if isinstance(value_obj, dict):
+        return value_obj.get("v")
+    if isinstance(value_obj, (int, float)):
+        return float(value_obj)
+    return None
+
+
+def _parse_measurement_datetime(time_info: Dict[str, Any]) -> Optional[datetime]:
+    """Try to parse the measurement timestamp returned by WAQI."""
+    time_str = time_info.get("s") or time_info.get("iso")
+    if not time_str:
+        return None
+    try:
+        return datetime.fromisoformat(time_str)
+    except ValueError:
+        pass
+    # WAQI sometimes omits separators, try common fallback formats
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M:%S"):
+        try:
+            return datetime.strptime(time_str, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def _extract_available_feature_values(data_section: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Extract whatever model feature columns can be sourced from WAQI data.
+    Only includes fields that the API actually exposes.
+    """
+    iaqi = data_section.get("iaqi", {})
+    measurement_dt = _parse_measurement_datetime(data_section.get("time", {}))
+    if not measurement_dt:
+        measurement_dt = datetime.now()
+
+    features: Dict[str, Any] = {
+        "year": measurement_dt.year,
+        "month": measurement_dt.month,
+        "day": measurement_dt.day,
+        "hour": measurement_dt.hour,
+    }
+
+    def set_feature(name: str, value: Optional[float]):
+        if value is not None:
+            features[name] = value
+
+    set_feature("O3_forecast", _get_iaqi_value(iaqi, "o3"))
+    set_feature("NO2_forecast", _get_iaqi_value(iaqi, "no2"))
+    set_feature("T_forecast", _get_iaqi_value(iaqi, "t"))
+    set_feature("q_forecast", _get_iaqi_value(iaqi, "h"))  # humidity proxy
+    set_feature("w_forecast", _get_iaqi_value(iaqi, "w"))
+
+    return features
 
 
 class AirQualityPipeline:
@@ -110,6 +251,8 @@ class AirQualityPipeline:
         station_lat = station_geo[0] if isinstance(station_geo, list) and len(station_geo) > 0 else None
         station_lng = station_geo[1] if isinstance(station_geo, list) and len(station_geo) > 1 else None
         
+        available_features = _extract_available_feature_values(data)
+
         # Extract additional metadata
         result = {
             "timestamp": datetime.now().isoformat(),
@@ -138,7 +281,8 @@ class AirQualityPipeline:
                     "available": o3_value is not None
                 }
             },
-            "all_iaqi": iaqi  # Include all individual AQI values for reference
+            "all_iaqi": iaqi,  # Include all individual AQI values for reference
+            "available_features": available_features
         }
         
         return result
@@ -260,6 +404,12 @@ class AirQualityPipeline:
                 o3 = data["concentrations"]["o3"]["value"]
                 print(f"  ✓ Success - Station: {data.get('station_name', 'N/A')}")
                 print(f"    NO2: {no2 if no2 else 'N/A'} µg/m³ | O3: {o3 if o3 else 'N/A'} µg/m³")
+                available_features = data.get("available_features", {})
+                feature_keys = ["year", "month", "day", "hour", "O3_forecast", "NO2_forecast", "T_forecast", "q_forecast", "w_forecast"]
+                feature_pairs = [f"{key}={round(available_features[key], 2) if isinstance(available_features[key], float) else available_features[key]}"
+                                 for key in feature_keys if key in available_features]
+                if feature_pairs:
+                    print(f"    Available features -> {', '.join(feature_pairs)}")
             else:
                 print(f"  ✗ Error: {result.get('error', 'Unknown error')}")
             
@@ -352,6 +502,7 @@ def main():
     parser.add_argument("--continuous", action="store_true", help="Run continuous monitoring")
     parser.add_argument("--interval", type=int, default=3600, help="Interval in seconds for continuous mode (default: 3600)")
     parser.add_argument("--multiple", action="store_true", help="Fetch data for multiple Delhi sites")
+    parser.add_argument("--sites-file", type=str, help="Optional path to lat/lon file for --multiple mode")
     
     args = parser.parse_args()
     
@@ -359,17 +510,12 @@ def main():
     pipeline = AirQualityPipeline(api_token=args.token, city=args.city)
     
     if args.multiple:
-        # Fetch data for all 7 Delhi sites
-        delhi_sites = [
-            {"site": 1, "latitude": 28.69536, "longitude": 77.18168},
-            {"site": 2, "latitude": 28.5718, "longitude": 77.07125},
-            {"site": 3, "latitude": 28.58278, "longitude": 77.23441},
-            {"site": 4, "latitude": 28.82286, "longitude": 77.10197},
-            {"site": 5, "latitude": 28.53077, "longitude": 77.27123},
-            {"site": 6, "latitude": 28.72954, "longitude": 77.09601},
-            {"site": 7, "latitude": 28.71052, "longitude": 77.24951}
-        ]
-        
+        # Fetch data for all Delhi sites using provided file or defaults
+        delhi_sites = load_site_coordinates(args.sites_file)
+        if not delhi_sites:
+            print("No site coordinates available. Aborting.")
+            return
+
         print("=" * 70)
         print("FETCHING AIR QUALITY DATA FOR ALL DELHI SITES")
         print("=" * 70)
