@@ -16,7 +16,6 @@ from contextlib import asynccontextmanager
 
 from app.api import predict, health
 from app.core.logging_config import setup_logging
-from app.api.era5 import router as era5_router
 
 # Setup logging
 setup_logging()
@@ -87,8 +86,6 @@ app.add_middleware(
 # Include routers
 app.include_router(predict.router)
 app.include_router(health.router)
-app.include_router(era5_router)
-
 
 
 @app.get("/", tags=["root"])
