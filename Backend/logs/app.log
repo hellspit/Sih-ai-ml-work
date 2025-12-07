@@ -302,3 +302,16 @@
 2025-12-08 00:18:50 - app.main - INFO - Loaded unified model
 2025-12-08 00:18:50 - app.main - INFO - Successfully pre-loaded 8 model(s)
 2025-12-08 00:38:11 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 00:51:38 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 00:51:38 - app.main - INFO - Loading models...
+2025-12-08 00:51:38 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 00:51:38 - app.main - WARNING - Could not pre-load model for site 1: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:51:38 - app.main - WARNING - Could not pre-load model for site 2: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:51:38 - app.main - WARNING - Could not pre-load model for site 3: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:51:38 - app.main - WARNING - Could not pre-load model for site 4: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:51:38 - app.main - WARNING - Could not pre-load model for site 5: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:51:38 - app.main - WARNING - Could not pre-load model for site 6: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:51:38 - app.main - WARNING - Could not pre-load model for site 7: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:51:38 - app.main - WARNING - Could not pre-load unified model: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:51:38 - app.main - INFO - Models will be loaded on-demand when first request is made
+2025-12-08 00:58:42 - app.main - INFO - Shutting down Air Pollution Forecasting API...
