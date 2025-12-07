@@ -8,9 +8,10 @@ import Index from "./pages/Index";
 import Reports from "./components/Reports";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
-import Forecast from "./components/forecast";
+import Forecast from "./components/Forecast";
 import ModelEvaluation from "./components/ModelEvaluation";
 import About from "./components/About";
+import Dashboard from "./components/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,7 @@ export default function App() {
                 { <Route path="/forecast" element={<Forecast />} /> }
                 <Route path="/model_evaluation" element={<ModelEvaluation />} />
                 <Route path="/reports" element={<Reports />} />
-                <Route path="/about" element={<About />} />
+                <Route path="/dashboard" element={<Dashboard />} />
 
               </Route>
               

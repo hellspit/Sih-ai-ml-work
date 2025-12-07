@@ -14,6 +14,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/contexts/ThemeContext';
+import { Filter, ChevronDown } from 'lucide-react';
 
 interface PollutantEvalMetrics {
   pollutant: string;
@@ -37,12 +38,18 @@ interface RunningMeanDataPoint {
   r2: number;
 }
 
+type PollutantType = 'NO2' | 'O3' | 'HCHO' | 'CO' | 'PM25' | 'PM10';
+type MetricType = 'RMSE' | 'MAE' | 'R2';
+
 const ModelEvaluation = () => {
   const { theme } = useTheme();
-  const [selectedPollutant, setSelectedPollutant] = useState<'NO2' | 'O3'>('O3');
+  const [selectedPollutant, setSelectedPollutant] = useState<PollutantType>('O3');
+  const [selectedMetric, setSelectedMetric] = useState<MetricType>('RMSE');
+  const [isPollutantDropdownOpen, setIsPollutantDropdownOpen] = useState(false);
+  const [isMetricDropdownOpen, setIsMetricDropdownOpen] = useState(false);
 
   // Dummy metrics data for demonstration
-  const metricsData: Record<string, PollutantEvalMetrics> = {
+  const metricsData: Record<PollutantType, PollutantEvalMetrics> = {
     O3: {
       pollutant: 'O₃',
       rmse: 2.0,
@@ -59,17 +66,72 @@ const ModelEvaluation = () => {
       unit: 'ppb',
       color: '#2563eb',
     },
+    HCHO: {
+      pollutant: 'HCHO',
+      rmse: 1.8,
+      mae: 8,
+      r_mean: 0.90,
+      unit: 'ppb',
+      color: '#10b981',
+    },
+    CO: {
+      pollutant: 'CO',
+      rmse: 25.0,
+      mae: 120,
+      r_mean: 0.85,
+      unit: 'ppm',
+      color: '#f59e0b',
+    },
+    PM25: {
+      pollutant: 'PM₂.₅',
+      rmse: 4.2,
+      mae: 18,
+      r_mean: 0.87,
+      unit: 'µg/m³',
+      color: '#f97316',
+    },
+    PM10: {
+      pollutant: 'PM₁₀',
+      rmse: 6.5,
+      mae: 25,
+      r_mean: 0.84,
+      unit: 'µg/m³',
+      color: '#ef4444',
+    },
   };
 
+  const pollutantOptions: { value: PollutantType; label: string }[] = [
+    { value: 'NO2', label: 'NO₂' },
+    { value: 'O3', label: 'O₃' },
+    { value: 'HCHO', label: 'HCHO' },
+    { value: 'CO', label: 'CO' },
+    { value: 'PM25', label: 'PM₂.₅' },
+    { value: 'PM10', label: 'PM₁₀' },
+  ];
+
+  const metricOptions: { value: MetricType; label: string }[] = [
+    { value: 'RMSE', label: 'RMSE' },
+    { value: 'MAE', label: 'MAE' },
+    { value: 'R2', label: 'R²' },
+  ];
+
   // Generate realistic evaluation chart data
-  const generateEvaluationData = (pollutant: 'NO2' | 'O3'): EvaluationDataPoint[] => {
-    const baseValue = pollutant === 'O3' ? 50 : 70;
+  const generateEvaluationData = (pollutant: PollutantType): EvaluationDataPoint[] => {
+    const baseValues: Record<PollutantType, number> = {
+      O3: 50,
+      NO2: 70,
+      HCHO: 12,
+      CO: 500,
+      PM25: 45,
+      PM10: 80,
+    };
+    const baseValue = baseValues[pollutant];
     const data: EvaluationDataPoint[] = [];
 
     for (let i = 0; i < 24; i++) {
-      const variance = Math.sin(i / 24 * Math.PI * 2) * 15;
-      const predicted = baseValue + variance + (Math.random() - 0.5) * 8;
-      const actual = baseValue + variance + (Math.random() - 0.5) * 10;
+      const variance = Math.sin(i / 24 * Math.PI * 2) * (baseValue * 0.3);
+      const predicted = baseValue + variance + (Math.random() - 0.5) * (baseValue * 0.15);
+      const actual = baseValue + variance + (Math.random() - 0.5) * (baseValue * 0.2);
 
       data.push({
         time: `${String(i).padStart(2, '0')}:00`,
@@ -82,9 +144,11 @@ const ModelEvaluation = () => {
   };
 
   // Generate running mean data for RMSE, MAE, and R²
-  const generateRunningMeanData = (pollutant: 'NO2' | 'O3'): RunningMeanDataPoint[] => {
+  const generateRunningMeanData = (pollutant: PollutantType): RunningMeanDataPoint[] => {
     const startDate = new Date('2024-11-29');
     const data: RunningMeanDataPoint[] = [];
+
+    const baseMetrics = metricsData[pollutant];
 
     for (let i = 0; i < 10; i++) {
       const currentDate = new Date(startDate);
@@ -94,17 +158,9 @@ const ModelEvaluation = () => {
 
       // Create a smooth curve for running means
       const progress = i / 9;
-      let rmseValue, maeValue, r2Value;
-
-      if (pollutant === 'O3') {
-        rmseValue = 5 + Math.sin(progress * Math.PI * 2) * 3 + progress * 2;
-        maeValue = 12 + Math.sin(progress * Math.PI * 1.5) * 4 + progress * 3;
-        r2Value = 0.75 + Math.sin(progress * Math.PI * 1.2) * 0.15 + progress * 0.1;
-      } else {
-        rmseValue = 6 + Math.sin(progress * Math.PI * 2) * 3.5 + progress * 2.5;
-        maeValue = 14 + Math.sin(progress * Math.PI * 1.5) * 5 + progress * 3.5;
-        r2Value = 0.72 + Math.sin(progress * Math.PI * 1.2) * 0.16 + progress * 0.12;
-      }
+      const rmseValue = baseMetrics.rmse * 1.5 + Math.sin(progress * Math.PI * 2) * (baseMetrics.rmse * 0.5) + progress * (baseMetrics.rmse * 0.3);
+      const maeValue = baseMetrics.mae * 1.3 + Math.sin(progress * Math.PI * 1.5) * (baseMetrics.mae * 0.4) + progress * (baseMetrics.mae * 0.3);
+      const r2Value = baseMetrics.r_mean * 0.8 + Math.sin(progress * Math.PI * 1.2) * 0.15 + progress * 0.1;
 
       data.push({
         date: dateStr,
@@ -123,29 +179,6 @@ const ModelEvaluation = () => {
 
   return (
     <div className="space-y-6">
-      {/* Pollutant Selector */}
-      <div className="flex gap-4">
-        <div className="flex items-center gap-2">
-          <span className={`text-sm font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>Pollutant:</span>
-          <div className="flex gap-2">
-            {(['NO2', 'O3'] as const).map((pollutant) => (
-              <button
-                key={pollutant}
-                onClick={() => setSelectedPollutant(pollutant)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedPollutant === pollutant
-                    ? 'bg-cyan-600 text-white'
-                    : theme === 'dark'
-                    ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                    : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                }`}
-              >
-                {pollutant === 'NO2' ? 'NO₂' : 'O₃'}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -153,9 +186,14 @@ const ModelEvaluation = () => {
         <Card className={`border p-6 rounded-xl ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'}`}>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className={`text-sm font-semibold uppercase tracking-wide ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                RMSE
-              </h3>
+              <div>
+                <h3 className={`text-sm font-semibold uppercase tracking-wide ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
+                  RMSE
+                </h3>
+                <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                  {metrics.pollutant}
+                </p>
+              </div>
               <Badge className="bg-cyan-600/20 text-cyan-400 border-0">
                 {metrics.unit}
               </Badge>
@@ -174,9 +212,14 @@ const ModelEvaluation = () => {
         <Card className={`border p-6 rounded-xl ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'}`}>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className={`text-sm font-semibold uppercase tracking-wide ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                MAE
-              </h3>
+              <div>
+                <h3 className={`text-sm font-semibold uppercase tracking-wide ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
+                  MAE
+                </h3>
+                <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                  {metrics.pollutant}
+                </p>
+              </div>
               <Badge className="bg-blue-600/20 text-blue-400 border-0">
                 {metrics.unit}
               </Badge>
@@ -195,9 +238,14 @@ const ModelEvaluation = () => {
         <Card className={`border p-6 rounded-xl ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'}`}>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className={`text-sm font-semibold uppercase tracking-wide ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                R²
-              </h3>
+              <div>
+                <h3 className={`text-sm font-semibold uppercase tracking-wide ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
+                  R²
+                </h3>
+                <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                  {metrics.pollutant}
+                </p>
+              </div>
               <Badge className="bg-emerald-600/20 text-emerald-400 border-0">
                 Score
               </Badge>
@@ -215,9 +263,71 @@ const ModelEvaluation = () => {
 
       {/* Prediction vs Actual Chart */}
       <Card className={`border p-6 rounded-xl ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'}`}>
-        <h3 className={`text-lg font-semibold mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-          {metrics.pollutant} - Predicted vs Actual Values
-        </h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+            {metrics.pollutant} - Predicted vs Actual Values
+          </h3>
+          {/* Pollutant Selector Dropdown - Right Upper Corner */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setIsPollutantDropdownOpen(!isPollutantDropdownOpen);
+                setIsMetricDropdownOpen(false);
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                theme === 'dark'
+                  ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                  : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              <span>{metricsData[selectedPollutant].pollutant}</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${isPollutantDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isPollutantDropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setIsPollutantDropdownOpen(false)}
+                />
+                <div
+                  className={`absolute top-full right-0 mt-2 z-20 min-w-[200px] rounded-lg border shadow-lg ${
+                    theme === 'dark'
+                      ? 'bg-slate-800 border-slate-700'
+                      : 'bg-white border-slate-200'
+                  }`}
+                >
+                  <div className="py-1">
+                    {pollutantOptions.map((option) => {
+                      const isSelected = selectedPollutant === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setSelectedPollutant(option.value);
+                            setIsPollutantDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                            isSelected
+                              ? theme === 'dark'
+                                ? 'bg-cyan-600/20 text-cyan-400'
+                                : 'bg-cyan-50 text-cyan-600'
+                              : theme === 'dark'
+                              ? 'text-slate-300 hover:bg-slate-700'
+                              : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={evaluationData}>
             <CartesianGrid
@@ -241,7 +351,8 @@ const ModelEvaluation = () => {
               dataKey="predicted"
               stroke={metrics.color}
               strokeWidth={3}
-              dot={false}
+              dot={{ fill: metrics.color, r: 4 }}
+              activeDot={{ r: 6 }}
               isAnimationActive={true}
               name={`Predicted ${metrics.pollutant}`}
             />
@@ -250,7 +361,8 @@ const ModelEvaluation = () => {
               dataKey="actual"
               stroke="#ef4444"
               strokeWidth={3}
-              dot={false}
+              dot={{ fill: '#ef4444', r: 4 }}
+              activeDot={{ r: 6 }}
               isAnimationActive={true}
               name={`Actual ${metrics.pollutant}`}
             />
@@ -258,48 +370,150 @@ const ModelEvaluation = () => {
         </ResponsiveContainer>
       </Card>
 
-      {/* Running Mean - RMSE */}
+      {/* Running Mean Chart - Filtered by Selected Metric */}
       <Card className={`border p-6 rounded-xl ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'}`}>
-        <h3 className={`text-lg font-semibold mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-          Running Mean (RMSE) - {metrics.pollutant}
-        </h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={runningMeanData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#334155' : '#e2e8f0'} />
-            <XAxis dataKey="date" stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} />
-            <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} label={{ value: `${metrics.unit}`, angle: -90, position: 'insideLeft' }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff',
-                border: `1px solid ${theme === 'dark' ? '#475569' : '#e2e8f0'}`,
-                borderRadius: '8px',
-              }}
-              labelStyle={{ color: theme === 'dark' ? '#f1f5f9' : '#1e293b' }}
-              formatter={(value: number) => value.toFixed(2)}
-            />
-            <Line
-              type="monotone"
-              dataKey="rmse"
-              stroke="#06b6d4"
-              strokeWidth={3}
-              dot={false}
-              isAnimationActive={true}
-              name={`RMSE (${metrics.unit})`}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </Card>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+            Running Mean ({selectedMetric === 'R2' ? 'R²' : selectedMetric}) - {metrics.pollutant}
+          </h3>
+          {/* Dropdowns in Right Upper Corner */}
+          <div className="flex items-center gap-2">
+            {/* Pollutant Selector Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setIsPollutantDropdownOpen(!isPollutantDropdownOpen);
+                  setIsMetricDropdownOpen(false);
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                  theme === 'dark'
+                    ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                    : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                <span>{metricsData[selectedPollutant].pollutant}</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${isPollutantDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isPollutantDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setIsPollutantDropdownOpen(false)}
+                  />
+                  <div
+                    className={`absolute top-full right-0 mt-2 z-20 min-w-[200px] rounded-lg border shadow-lg ${
+                      theme === 'dark'
+                        ? 'bg-slate-800 border-slate-700'
+                        : 'bg-white border-slate-200'
+                    }`}
+                  >
+                    <div className="py-1">
+                      {pollutantOptions.map((option) => {
+                        const isSelected = selectedPollutant === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => {
+                              setSelectedPollutant(option.value);
+                              setIsPollutantDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                              isSelected
+                                ? theme === 'dark'
+                                  ? 'bg-cyan-600/20 text-cyan-400'
+                                  : 'bg-cyan-50 text-cyan-600'
+                                : theme === 'dark'
+                                ? 'text-slate-300 hover:bg-slate-700'
+                                : 'text-slate-700 hover:bg-slate-50'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
 
-      {/* Running Mean - MAE */}
-      <Card className={`border p-6 rounded-xl ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'}`}>
-        <h3 className={`text-lg font-semibold mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-          Running Mean (MAE) - {metrics.pollutant}
-        </h3>
+            {/* Metric Selector Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setIsMetricDropdownOpen(!isMetricDropdownOpen);
+                  setIsPollutantDropdownOpen(false);
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                  theme === 'dark'
+                    ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                    : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                <span>{selectedMetric === 'R2' ? 'R²' : selectedMetric}</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${isMetricDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isMetricDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setIsMetricDropdownOpen(false)}
+                  />
+                  <div
+                    className={`absolute top-full right-0 mt-2 z-20 min-w-[150px] rounded-lg border shadow-lg ${
+                      theme === 'dark'
+                        ? 'bg-slate-800 border-slate-700'
+                        : 'bg-white border-slate-200'
+                    }`}
+                  >
+                    <div className="py-1">
+                      {metricOptions.map((option) => {
+                        const isSelected = selectedMetric === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => {
+                              setSelectedMetric(option.value);
+                              setIsMetricDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                              isSelected
+                                ? theme === 'dark'
+                                  ? 'bg-cyan-600/20 text-cyan-400'
+                                  : 'bg-cyan-50 text-cyan-600'
+                                : theme === 'dark'
+                                ? 'text-slate-300 hover:bg-slate-700'
+                                : 'text-slate-700 hover:bg-slate-50'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
         <ResponsiveContainer width="100%" height={350}>
           <LineChart data={runningMeanData}>
             <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#334155' : '#e2e8f0'} />
             <XAxis dataKey="date" stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} />
-            <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} label={{ value: `${metrics.unit}`, angle: -90, position: 'insideLeft' }} />
+            <YAxis 
+              stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} 
+              domain={selectedMetric === 'R2' ? [0, 1] : 'auto'}
+              label={{ 
+                value: selectedMetric === 'R2' ? 'Score' : `${metrics.unit}`, 
+                angle: -90, 
+                position: 'insideLeft' 
+              }} 
+            />
             <Tooltip
               contentStyle={{
                 backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff',
@@ -307,48 +521,30 @@ const ModelEvaluation = () => {
                 borderRadius: '8px',
               }}
               labelStyle={{ color: theme === 'dark' ? '#f1f5f9' : '#1e293b' }}
-              formatter={(value: number) => value.toFixed(2)}
+              formatter={(value: number) => selectedMetric === 'R2' ? value.toFixed(3) : value.toFixed(2)}
             />
             <Line
               type="monotone"
-              dataKey="mae"
-              stroke="#2563eb"
+              dataKey={selectedMetric === 'R2' ? 'r2' : selectedMetric.toLowerCase()}
+              stroke={
+                selectedMetric === 'RMSE' ? '#06b6d4' :
+                selectedMetric === 'MAE' ? '#2563eb' :
+                '#10b981'
+              }
               strokeWidth={3}
-              dot={false}
-              isAnimationActive={true}
-              name={`MAE (${metrics.unit})`}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </Card>
-
-      {/* Running Mean - R² */}
-      <Card className={`border p-6 rounded-xl ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'}`}>
-        <h3 className={`text-lg font-semibold mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-          Running Mean (R²) - {metrics.pollutant}
-        </h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={runningMeanData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#334155' : '#e2e8f0'} />
-            <XAxis dataKey="date" stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} />
-            <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} domain={[0, 1]} label={{ value: 'Score', angle: -90, position: 'insideLeft' }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff',
-                border: `1px solid ${theme === 'dark' ? '#475569' : '#e2e8f0'}`,
-                borderRadius: '8px',
+              dot={{
+                fill: selectedMetric === 'RMSE' ? '#06b6d4' :
+                      selectedMetric === 'MAE' ? '#2563eb' :
+                      '#10b981',
+                r: 4
               }}
-              labelStyle={{ color: theme === 'dark' ? '#f1f5f9' : '#1e293b' }}
-              formatter={(value: number) => value.toFixed(3)}
-            />
-            <Line
-              type="monotone"
-              dataKey="r2"
-              stroke="#10b981"
-              strokeWidth={3}
-              dot={false}
+              activeDot={{ r: 6 }}
               isAnimationActive={true}
-              name="R² Score"
+              name={
+                selectedMetric === 'RMSE' ? `RMSE (${metrics.unit})` :
+                selectedMetric === 'MAE' ? `MAE (${metrics.unit})` :
+                'R² Score'
+              }
             />
           </LineChart>
         </ResponsiveContainer>

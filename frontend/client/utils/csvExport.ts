@@ -93,6 +93,28 @@ export const generateDummyReportData = (
     intervalMs = 24 * 60 * 60 * 1000;
   }
 
+
+   const baselineValues = {
+    O3: 40,      // ppb
+    NO2: 50,     // ppb
+    PM1: 20,     // µg/m³
+    PM25: 45,    // µg/m³
+    PM10: 75,    // µg/m³
+    SO2: 20,     // ppb
+    CO: 700,     // ppb
+  };
+
+  const variationRanges = {
+    O3: 20,
+    NO2: 25,
+    PM1: 15,
+    PM25: 30,
+    PM10: 40,
+    SO2: 15,
+    CO: 300,
+  };
+
+
   while (current <= endDate) {
     const hour = current.getHours();
     const dayOfWeek = current.getDay();
