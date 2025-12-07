@@ -264,3 +264,116 @@
 2025-11-26 15:03:05 - app.main - INFO - Successfully pre-loaded 8 model(s)
 2025-11-26 15:29:44 - app.api.predict - WARNING - Site ID in request (1) differs from path (5), using path value
 2025-11-26 17:46:00 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 00:13:35 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 00:13:35 - app.main - INFO - Loading models...
+2025-12-08 00:13:35 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 00:13:35 - app.main - WARNING - Could not pre-load model for site 1: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:13:35 - app.main - WARNING - Could not pre-load model for site 2: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:13:35 - app.main - WARNING - Could not pre-load model for site 3: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:13:35 - app.main - WARNING - Could not pre-load model for site 4: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:13:35 - app.main - WARNING - Could not pre-load model for site 5: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:13:35 - app.main - WARNING - Could not pre-load model for site 6: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:13:35 - app.main - WARNING - Could not pre-load model for site 7: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:13:35 - app.main - WARNING - Could not pre-load unified model: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:13:35 - app.main - INFO - Models will be loaded on-demand when first request is made
+2025-12-08 00:37:47 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 00:43:46 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 00:43:46 - app.main - INFO - Loading models...
+2025-12-08 00:43:46 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 00:43:46 - app.main - WARNING - Could not pre-load model for site 1: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:43:46 - app.main - WARNING - Could not pre-load model for site 2: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:43:46 - app.main - WARNING - Could not pre-load model for site 3: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:43:46 - app.main - WARNING - Could not pre-load model for site 4: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:43:46 - app.main - WARNING - Could not pre-load model for site 5: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:43:46 - app.main - WARNING - Could not pre-load model for site 6: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:43:46 - app.main - WARNING - Could not pre-load model for site 7: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:43:46 - app.main - WARNING - Could not pre-load unified model: No module named 'xgboost'. Will load on-demand.
+2025-12-08 00:43:46 - app.main - INFO - Models will be loaded on-demand when first request is made
+2025-12-08 00:44:10 - ecmwf.datastores.legacy_client - INFO - [2025-12-03T00:00:00Z] To improve our CAMS service, we need to hear from you! Please complete this very short [survey]( https://confluence.ecmwf.int/x/CruBEQ/). Thank you.
+2025-12-08 00:44:10 - app.main - ERROR - Unhandled exception: 404 Client Error: Not Found for url: https://ads.atmosphere.copernicus.eu/api/retrieve/v1/processes/reanalysis-era5-single-levels
+process not found
+dataset reanalysis-era5-single-levels not found
+Traceback (most recent call last):
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\middleware\cors.py", line 83, in __call__
+    await self.app(scope, receive, send)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\routing.py", line 758, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\routing.py", line 778, in app
+    await route.handle(scope, receive, send)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\routing.py", line 299, in handle
+    await self.app(scope, receive, send)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\routing.py", line 79, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\routing.py", line 74, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\fastapi\routing.py", line 299, in app
+    raise e
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\fastapi\routing.py", line 294, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        dependant=dependant, values=values, is_coroutine=is_coroutine
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\anyio\to_thread.py", line 61, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2525, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\app\api\era5.py", line 47, in download_era5
+    client.retrieve(dataset, request).download(target=filepath)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\ecmwf\datastores\legacy_client.py", line 167, in retrieve
+    submitted = self.client.submit_and_wait_on_results(
+        collection_id=name,
+        request=request,
+    )
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\ecmwf\datastores\client.py", line 414, in submit_and_wait_on_results
+    return self._retrieve_api.submit(collection_id, request).get_results()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\ecmwf\datastores\processing.py", line 735, in submit
+    return self.get_process(collection_id).submit(request)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\ecmwf\datastores\processing.py", line 724, in get_process
+    return Process.from_request("get", url, **self._request_kwargs)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\ecmwf\datastores\processing.py", line 176, in from_request
+    cads_raise_for_status(response)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\sih_final _material\Sih-ai-ml-work\backend\.venv\Lib\site-packages\ecmwf\datastores\processing.py", line 99, in cads_raise_for_status
+    raise requests.HTTPError(message, response=response)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://ads.atmosphere.copernicus.eu/api/retrieve/v1/processes/reanalysis-era5-single-levels
+process not found
+dataset reanalysis-era5-single-levels not found
+2025-12-08 00:47:06 - ecmwf.datastores.legacy_client - INFO - [2025-12-03T00:00:00Z] To improve our C3S service, we need to hear from you! Please complete this very short [survey](https://confluence.ecmwf.int/x/E7uBEQ/). Thank you.
+2025-12-08 00:47:07 - ecmwf.datastores.legacy_client - INFO - Request ID is d6b282f4-092b-4fa2-993d-fee3e5356717
+2025-12-08 00:47:07 - ecmwf.datastores.legacy_client - INFO - status has been updated to accepted
+2025-12-08 00:47:17 - ecmwf.datastores.legacy_client - INFO - status has been updated to running
+2025-12-08 00:47:22 - ecmwf.datastores.legacy_client - INFO - status has been updated to successful
+2025-12-08 00:47:23 - multiurl.base - INFO - Downloading https://object-store.os-api.cci2.ecmwf.int:443/cci2-prod-cache-3/2025-12-07/2ba06d08fa0af87e656ad71149e9d6de.nc
