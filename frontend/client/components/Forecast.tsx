@@ -663,7 +663,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
-import { RefreshCw, AlertCircle, Clock, MapPin } from 'lucide-react';
+import { RefreshCw, AlertCircle, Clock, MapPin, Car, CheckCircle2 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { 
   LivePredictionResponse, 
@@ -783,6 +783,7 @@ export default function Dashboard() {
 
   return (
     <>
+    
       <Header 
         title="Air Quality Overview"
         subtitle="Current gases levels across all 7 regions of Delhi."
@@ -1170,7 +1171,32 @@ export default function Dashboard() {
             )}
 
             {activeTab === 'forecast' && forecastData && (
-              <ForecastChart data ={forecastData} siteId={selectedSite}/>
+              <div className="space-y-6">
+                {/* Time Range Selector */}
+                <div className={`flex items-center gap-4 p-4 rounded-lg border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                  <span className={`text-sm font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
+                    Forecast Period:
+                  </span>
+                  <div className={`flex gap-2 rounded-lg p-1 ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-100'}`}>
+                    {[24, 48].map((hours) => (
+                      <button
+                        key={hours}
+                        onClick={() => setTimeRange(hours as TimeRange)}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                          timeRange === hours
+                            ? 'bg-cyan-600 text-white'
+                            : theme === 'dark'
+                            ? 'text-slate-300 hover:bg-slate-600'
+                            : 'text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {hours}h
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <ForecastChart data={forecastData} siteId={selectedSite} timeRange={timeRange === 1 ? 24 : timeRange as 24 | 48} />
+              </div>
             )}
             {activeTab === 'tools' && (
               <InteractiveForecastTool 

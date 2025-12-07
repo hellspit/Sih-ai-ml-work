@@ -9,9 +9,10 @@ import HourlyDetailChart from '@/components/HourlyDetailChart';
 interface ForecastChartProps {
   data: PredictResponse;
   siteId: number;
+  timeRange?: 24 | 48;
 }
 
-export default function ForecastChart({ data, siteId }: ForecastChartProps) {
+export default function ForecastChart({ data, siteId, timeRange = 24 }: ForecastChartProps) {
   const { theme } = useTheme();
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const chartData = data.predictions.map((pred) => ({
@@ -37,7 +38,7 @@ export default function ForecastChart({ data, siteId }: ForecastChartProps) {
         <Card className={`border p-6 ${theme === 'dark' ? 'border-cyan-700 bg-gradient-to-br from-cyan-900/30 to-cyan-900/20' : 'border-cyan-300 bg-gradient-to-br from-cyan-50 to-cyan-100'}`}>
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className={`w-5 h-5 ${theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600'}`} />
-            <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>O₃ (Ozone) - 24 Hour Forecast</h3>
+            <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>O₃ (Ozone) - {timeRange} Hour Forecast</h3>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -62,7 +63,7 @@ export default function ForecastChart({ data, siteId }: ForecastChartProps) {
         <Card className={`border p-6 ${theme === 'dark' ? 'border-blue-700 bg-gradient-to-br from-blue-900/30 to-blue-900/20' : 'border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100'}`}>
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
-            <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>NO₂ (Nitrogen Dioxide) - 24 Hour Forecast</h3>
+            <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>NO₂ (Nitrogen Dioxide) - {timeRange} Hour Forecast</h3>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -86,7 +87,7 @@ export default function ForecastChart({ data, siteId }: ForecastChartProps) {
 
       {/* Chart */}
       <Card className={`p-6 border ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white shadow-sm'}`}>
-        <h3 className={`font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>24-Hour Pollution Level Trends</h3>
+        <h3 className={`font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{timeRange}-Hour Pollution Level Trends</h3>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#334155' : '#e2e8f0'} />
@@ -139,60 +140,75 @@ export default function ForecastChart({ data, siteId }: ForecastChartProps) {
         <HourlyDetailChart hour={selectedHour} data={[]} />
       )}
 
-      {/* Forecast Details Table */}
+      {/* Hour Selector Section */}
       <Card className={`p-6 border ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white shadow-sm'}`}>
-        <h3 className={`font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Hourly Forecast Details</h3>
-        <div className={`mb-4 text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-          {selectedHour !== null && (
-            <button
-              onClick={() => setSelectedHour(null)}
-              className="text-cyan-500 hover:text-cyan-400 underline"
-            >
-              ← Back to all hours
-            </button>
-          )}
+        <h3 className={`font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Select Hour for Detailed Report</h3>
+        <div className="mb-4">
+          <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+            Choose an hour to generate a detailed forecast report
+          </p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className={`border-b ${theme === 'dark' ? 'bg-slate-700 border-slate-600' : 'bg-slate-100 border-slate-300'}`}>
-              <tr>
-                <th className={`px-4 py-3 text-left font-semibold ${theme === 'dark' ? 'text-slate-100' : 'text-slate-900'}`}>Hour</th>
-                <th className={`px-4 py-3 text-right font-semibold ${theme === 'dark' ? 'text-slate-100' : 'text-slate-900'}`}>O₃ (µg/m³)</th>
-                <th className={`px-4 py-3 text-right font-semibold ${theme === 'dark' ? 'text-slate-100' : 'text-slate-900'}`}>NO₂ (µg/m³)</th>
-                <th className={`px-4 py-3 text-center font-semibold ${theme === 'dark' ? 'text-slate-100' : 'text-slate-900'}`}>Action</th>
-              </tr>
-            </thead>
-            <tbody className={`divide-y ${theme === 'dark' ? 'divide-slate-700' : 'divide-slate-200'}`}>
-              {data.predictions.map((pred, idx) => (
-                <tr key={idx} className={`transition-colors ${theme === 'dark' ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50'}`}>
-                  <td className={`px-4 py-3 font-medium ${theme === 'dark' ? 'text-slate-100' : 'text-slate-900'}`}>
-                    {String(pred.hour).padStart(2, '0')}:00
-                  </td>
-                  <td className={`px-4 py-3 text-right font-semibold ${theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600'}`}>
-                    {pred.O3_target.toFixed(1)}
-                  </td>
-                  <td className={`px-4 py-3 text-right font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                    {pred.NO2_target.toFixed(1)}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => setSelectedHour(pred.hour)}
-                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                        selectedHour === pred.hour
-                          ? 'bg-cyan-600 text-white'
-                          : theme === 'dark'
-                          ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                          : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                      }`}
-                    >
-                      {selectedHour === pred.hour ? 'Selected' : 'View Detail'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-2">
+          {data.predictions.map((pred) => {
+            const hourLabel = timeRange === 48 && pred.hour >= 24 
+              ? `Day 2 ${String(pred.hour % 24).padStart(2, '0')}:00`
+              : `${String(pred.hour).padStart(2, '0')}:00`;
+            const isSelected = selectedHour === pred.hour;
+            
+            return (
+              <button
+                key={pred.hour}
+                onClick={() => setSelectedHour(pred.hour)}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  isSelected
+                    ? 'bg-cyan-600 text-white shadow-md'
+                    : theme === 'dark'
+                    ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900'
+                }`}
+              >
+                {hourLabel}
+              </button>
+            );
+          })}
         </div>
+        {selectedHour !== null && (
+          <div className="mt-4 p-4 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800">
+            <div className="flex items-center justify-between mb-2">
+              <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                Selected Hour: {timeRange === 48 && selectedHour >= 24 
+                  ? `Day 2 ${String(selectedHour % 24).padStart(2, '0')}:00`
+                  : `${String(selectedHour).padStart(2, '0')}:00`}
+              </span>
+              <button
+                onClick={() => setSelectedHour(null)}
+                className={`text-sm px-2 py-1 rounded ${theme === 'dark' ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700'}`}
+              >
+                Clear Selection
+              </button>
+            </div>
+            {(() => {
+              const selectedPred = data.predictions.find(p => p.hour === selectedHour);
+              if (!selectedPred) return null;
+              return (
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>O₃ (µg/m³)</p>
+                    <p className={`text-lg font-bold ${theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600'}`}>
+                      {selectedPred.O3_target.toFixed(1)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>NO₂ (µg/m³)</p>
+                    <p className={`text-lg font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                      {selectedPred.NO2_target.toFixed(1)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
       </Card>
     </div>
   );

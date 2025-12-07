@@ -49,7 +49,7 @@ export default function OverviewMetrics({
       <Card className={`p-4 border ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
         <p className={`text-xs mb-2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Current O₃ (ppb)</p>
         <div className="flex items-end gap-2">
-          <span className="text-3xl font-bold text-cyan-500">{Math.round(o3)}</span>
+          <span className="text-3xl font-bold text-blue-500">{Math.round(o3)}</span>
           <span className={`text-sm font-semibold mb-1 ${getTrendColor(o3Trend)}`}>
             {getTrendLabel(o3Trend)}
           </span>

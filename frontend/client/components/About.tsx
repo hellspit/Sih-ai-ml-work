@@ -55,7 +55,7 @@ export default function About() {
           >
             <div className="flex flex-col gap-4 max-w-2xl">
               <h1 className="text-white text-4xl font-black leading-tight tracking-tight sm:text-5xl">
-                About This Dashboard
+                SKYSENSE 
               </h1>
               <h2 className="text-slate-200 text-base sm:text-lg font-medium leading-relaxed">
                 We provide simple, trustworthy air-quality information for Delhi by showing current pollution levels and short-term forecasts so anyone can plan their day with confidence.
@@ -213,9 +213,7 @@ export default function About() {
                 <div className="flex-1 h-full bg-[#ffff00]" title="Moderate"></div>
                 <div className="flex-1 h-full bg-[#ff7e00]" title="Unhealthy for Sensitive Groups"></div>
                 <div className="flex-1 h-full bg-[#ff0000]" title="Unhealthy"></div>
-                <div className="flex-1 h-full bg-[#8f3f97]" title="Very Unhealthy"></div>
-                <div className="flex-1 h-full bg-[#7e0023]" title="Hazardous"></div>
-              </div>
+               </div>
             </div>
           </div>
         </div>
