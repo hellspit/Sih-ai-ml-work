@@ -75,9 +75,11 @@ def train_ensemble(site_id: int, target: str = 'NO2', data_dir: str = 'F',
     print("\nInitializing ensemble model...")
     
     # LightGBM parameters
+    # Quick mode: reduce trials for faster testing
+    n_trials = 10 if (use_optuna and quick_mode) else (50 if use_optuna else 0)
     lgbm_params = {
         'use_optuna': use_optuna,
-        'n_trials': 50 if use_optuna else 0
+        'n_trials': n_trials
     }
     
     # TFT parameters
@@ -224,6 +226,8 @@ def main():
                        help='Number of CV splits (default: 5)')
     parser.add_argument('--use-optuna', action='store_true',
                        help='Use Optuna for LightGBM hyperparameter tuning')
+    parser.add_argument('--quick', action='store_true',
+                       help='Quick mode: 3 CV folds, 10 Optuna trials (for faster testing)')
     parser.add_argument('--both-targets', action='store_true',
                        help='Train models for both NO2 and O3')
     
@@ -238,8 +242,9 @@ def main():
                     target=target,
                     data_dir=args.data_dir,
                     use_cv=not args.no_cv,
-                    n_splits=args.n_splits,
-                    use_optuna=args.use_optuna
+                    n_splits=3 if args.quick else args.n_splits,  # Quick mode: 3 folds
+                    use_optuna=args.use_optuna,
+                    quick_mode=args.quick
                 )
             except Exception as e:
                 print(f"\nError training {target} model: {e}")
