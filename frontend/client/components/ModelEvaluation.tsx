@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -147,6 +148,7 @@ const ModelEvaluation = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       {/* Site and Pollutant Selector */}
       <Card className={`border p-4 rounded-xl ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'}`}>
@@ -639,7 +641,8 @@ const ModelEvaluation = () => {
         </div>
       </Card>
     </div>
-  );
+
+    </>  );
 };
 
 export default ModelEvaluation;

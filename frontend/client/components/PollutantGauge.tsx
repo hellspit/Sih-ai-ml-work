@@ -54,8 +54,8 @@ export default function PollutantGauge({
               cy="50%"
               startAngle={180}
               endAngle={0}
-              innerRadius={40}
-              outerRadius={50}
+              innerRadius={30}
+              outerRadius={40}
               dataKey="value"
             >
               <Cell fill={statusColor} />
