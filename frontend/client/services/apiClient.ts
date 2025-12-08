@@ -6,6 +6,7 @@ import {
   ModelHealthResponse,
   ModelDetailResponse,
   MetricsResponse,
+  HistoricalDataResponse,
 } from "@shared/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -110,6 +111,13 @@ class ApiClient {
   }
 
   /**
+   * 24-hour forecast using live WAQI feed for a specific site
+   */
+  async livePrediction24hSite(siteId: number): Promise<LivePredictionResponse> {
+    return this.request(`/api/v1/predict/site/${siteId}/live/24h`);
+  }
+
+  /**
    * Predict using unified model
    */
   async predictUnified(request: PredictRequest): Promise<PredictResponse> {
@@ -134,6 +142,16 @@ class ApiClient {
    */
   async getMetrics(): Promise<MetricsResponse> {
     return this.request("/api/v1/predict/metrics");
+  }
+
+  /**
+   * Get historical observed data for a site
+   */
+  async getHistoricalData(siteId: number, days?: number, hours?: number): Promise<HistoricalDataResponse> {
+    if (hours !== undefined) {
+      return this.request(`/api/v1/predict/site/${siteId}/historical?hours=${hours}`);
+    }
+    return this.request(`/api/v1/predict/site/${siteId}/historical?days=${days || 30}`);
   }
 }
 

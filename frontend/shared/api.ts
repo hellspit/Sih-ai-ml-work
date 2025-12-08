@@ -123,3 +123,21 @@ export interface MetricsResponse {
   generated_at: string;
   sites: SiteMetrics[];
 }
+
+export interface HistoricalDataPoint {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  O3_observed: number | null;
+  NO2_observed: number | null;
+  datetime: string;
+}
+
+export interface HistoricalDataResponse {
+  success: boolean;
+  site_id: number;
+  time_period: string;
+  data_points: number;
+  data: HistoricalDataPoint[];
+}

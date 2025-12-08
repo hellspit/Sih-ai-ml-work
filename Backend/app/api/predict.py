@@ -3,11 +3,12 @@ Prediction API routes for air pollution forecasting
 """
 
 from fastapi import APIRouter, HTTPException, status
-from typing import Optional
+from typing import Optional, List, Dict, Any
 import pandas as pd
 import logging
 import json
 from pathlib import Path
+from datetime import datetime, timedelta
 
 from app.schemas.predict_request import PredictRequest
 from app.schemas.predict_response import PredictResponse, ErrorResponse, LiveSourceMetadata
@@ -55,6 +56,131 @@ async def get_model_metrics():
             detail="Model metrics are unavailable. Please regenerate them."
         )
     return data
+
+
+@router.get(
+    "/site/{site_id}/historical",
+    status_code=status.HTTP_200_OK,
+    summary="Get historical observed data",
+    description="Return last 30 days (or 24 hours) of observed O3 and NO2 data from training CSV files"
+)
+async def get_historical_data(site_id: int, days: int = 30, hours: int = None):
+    """
+    Get historical observed data for a site from the training CSV files.
+    
+    Args:
+        site_id: Site number (1-7)
+        days: Number of days to return (default: 30, max: 30). Ignored if hours is provided.
+        hours: Number of hours to return (for 24-hour view). If provided, overrides days.
+        
+    Returns:
+        Dictionary with historical observed data
+    """
+    try:
+        if not 1 <= site_id <= 7:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Site ID must be between 1 and 7, got {site_id}"
+            )
+        
+        # Determine hours to fetch
+        if hours is not None:
+            hours_to_fetch = min(hours, 24)  # Max 24 hours
+            time_period = f"{hours_to_fetch} hours"
+        else:
+            if days > 30:
+                days = 30
+            hours_to_fetch = days * 24
+            time_period = f"{days} days"
+        
+        # Load CSV file for the site
+        csv_path = Path(__file__).resolve().parent.parent.parent / "Data_SIH_2025" / f"site_{site_id}_train_data.csv"
+        
+        if not csv_path.exists():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Historical data file not found for site {site_id}"
+            )
+        
+        # Read CSV
+        df = pd.read_csv(csv_path)
+        
+        # Ensure we have required columns
+        required_cols = ['year', 'month', 'day', 'hour', 'O3_target', 'NO2_target']
+        if not all(col in df.columns for col in required_cols):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="CSV file missing required columns"
+            )
+        
+        # Convert to datetime and sort
+        df['datetime'] = pd.to_datetime(df[['year', 'month', 'day', 'hour']])
+        df = df.sort_values('datetime', ascending=False)
+        
+        # Get data based on time period
+        if hours is not None:
+            # For hours, get last N hours of data points
+            df_recent = df.head(hours_to_fetch).sort_values('datetime', ascending=True)
+        else:
+            # For days, get all data from the last N calendar days from TODAY ONLY
+            # Use today's date as the reference point (no fallback to CSV dates)
+            from datetime import datetime
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            # Calculate cutoff: N days before today (at start of day)
+            # For 7 days: if today is Dec 8, cutoff is Dec 1 (includes Dec 1-8, 7 days)
+            # For 30 days: if today is Dec 8, cutoff is Nov 8 (includes Nov 8 - Dec 8, 30 days)
+            cutoff_date = today - pd.Timedelta(days=days - 1)  # days-1 because we want inclusive
+            
+            # Filter to only include data from the last N calendar days from TODAY (inclusive)
+            df_recent = df[(df['datetime'] >= cutoff_date) & (df['datetime'] <= today)].sort_values('datetime', ascending=True)
+            
+            # Additional validation: ensure we only have the last N unique calendar days from today
+            if len(df_recent) > 0:
+                # Get unique dates and sort
+                unique_dates = sorted(df_recent['datetime'].dt.date.unique(), reverse=True)
+                
+                # Take only the last N calendar days from today
+                if len(unique_dates) > days:
+                    # Get the N most recent dates (closest to today)
+                    unique_dates_to_keep = unique_dates[:days]
+                    # Filter to only those dates
+                    df_recent = df_recent[df_recent['datetime'].dt.date.isin(unique_dates_to_keep)]
+                
+                unique_dates_final = sorted(df_recent['datetime'].dt.date.unique())
+                logger.info(f"Historical data: {len(df_recent)} points, {len(unique_dates_final)} unique days from {unique_dates_final[0] if unique_dates_final else 'N/A'} to {unique_dates_final[-1] if unique_dates_final else 'N/A'} (requested: last {days} days from TODAY {today.date()})")
+            else:
+                logger.warning(f"No data found for the last {days} days from TODAY {today.date()}. CSV data may be older than the requested date range.")
+        
+        # Convert to list of dictionaries
+        historical_data = []
+        for _, row in df_recent.iterrows():
+            historical_data.append({
+                "year": int(row['year']),
+                "month": int(row['month']),
+                "day": int(row['day']),
+                "hour": int(row['hour']),
+                "O3_observed": float(row['O3_target']) if pd.notna(row['O3_target']) else None,
+                "NO2_observed": float(row['NO2_target']) if pd.notna(row['NO2_target']) else None,
+                "datetime": row['datetime'].strftime("%Y-%m-%d %H:%M:%S")
+            })
+        
+        return {
+            "success": True,
+            "site_id": site_id,
+            "time_period": time_period,
+            "data_points": len(historical_data),
+            "data": historical_data
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching historical data: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error fetching historical data: {str(e)}"
+        )
 
 
 @router.get(
@@ -120,6 +246,93 @@ async def predict_live_site(site_id: int):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error generating live prediction: {str(e)}"
+        )
+
+
+@router.get(
+    "/site/{site_id}/live/24h",
+    response_model=PredictResponse,
+    status_code=status.HTTP_200_OK,
+    summary="24-hour forecast using live WAQI data",
+    description="Fetch live WAQI measurements for a site and generate 24-hour forecast predictions"
+)
+async def predict_live_24h_site(site_id: int):
+    """
+    Fetch live WAQI measurements for the given site and generate 24-hour forecast.
+    Uses the current observation as the base and generates predictions for the next 24 hours.
+    """
+    try:
+        if not 1 <= site_id <= 7:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Site ID must be between 1 and 7, got {site_id}"
+            )
+
+        live_payload = live_data_service.get_site_features(site_id)
+        base_features = live_payload["features"]
+        metadata = live_payload["metadata"]
+
+        # Generate input data for 24 hours
+        # Use the current observation as base and increment time for each hour
+        from datetime import datetime, timedelta
+        
+        input_data = []
+        base_datetime = datetime(
+            int(base_features.get("year", datetime.now().year)),
+            int(base_features.get("month", datetime.now().month)),
+            int(base_features.get("day", datetime.now().day)),
+            int(base_features.get("hour", datetime.now().hour))
+        )
+        
+        for hour_offset in range(24):
+            forecast_datetime = base_datetime + timedelta(hours=hour_offset)
+            hour_features = base_features.copy()
+            hour_features["year"] = forecast_datetime.year
+            hour_features["month"] = forecast_datetime.month
+            hour_features["day"] = forecast_datetime.day
+            hour_features["hour"] = forecast_datetime.hour
+            input_data.append(hour_features)
+
+        predictions = prediction_service.predict_from_dict(
+            input_data=input_data,
+            site_id=site_id,
+            forecast_hours=24
+        )
+
+        live_source = LiveSourceMetadata(
+            station_id=metadata.get("station_id"),
+            station_name=metadata.get("station_name"),
+            station_location=metadata.get("station_location"),
+            measurement_time=metadata.get("measurement_time"),
+            timezone=metadata.get("timezone"),
+            overall_aqi=metadata.get("overall_aqi"),
+            observed_no2=metadata.get("observed_no2"),
+            observed_o3=metadata.get("observed_o3"),
+        )
+
+        station_name = metadata.get("station_name", "WAQI station")
+        return PredictResponse(
+            success=True,
+            site_id=site_id,
+            forecast_hours=24,
+            predictions=predictions,
+            message=f"24-hour forecast generated using live data from {station_name}",
+            live_source=live_source
+        )
+
+    except HTTPException:
+        raise
+    except FileNotFoundError as e:
+        logger.error(f"Model file not found: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Model for site {site_id} not found. Please ensure models are trained and available."
+        )
+    except Exception as e:
+        logger.error(f"Error generating 24-hour forecast: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating 24-hour forecast: {str(e)}"
         )
 
 

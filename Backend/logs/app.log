@@ -314,3 +314,758 @@
 2025-12-08 00:38:22 - app.main - INFO - Loaded model for site 7
 2025-12-08 00:38:22 - app.main - INFO - Loaded unified model
 2025-12-08 00:38:22 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 01:40:55 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 01:41:00 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 01:41:00 - app.main - INFO - Loading models...
+2025-12-08 01:41:00 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 01:41:06 - app.main - INFO - Loaded model for site 1
+2025-12-08 01:41:06 - app.main - INFO - Loaded model for site 2
+2025-12-08 01:41:06 - app.main - INFO - Loaded model for site 3
+2025-12-08 01:41:06 - app.main - INFO - Loaded model for site 4
+2025-12-08 01:41:06 - app.main - INFO - Loaded model for site 5
+2025-12-08 01:41:06 - app.main - INFO - Loaded model for site 6
+2025-12-08 01:41:06 - app.main - INFO - Loaded model for site 7
+2025-12-08 01:41:06 - app.main - INFO - Loaded unified model
+2025-12-08 01:41:06 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 01:41:57 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 01:41:58 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 01:41:58 - app.main - INFO - Loading models...
+2025-12-08 01:41:58 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 01:41:59 - app.main - INFO - Loaded model for site 1
+2025-12-08 01:41:59 - app.main - INFO - Loaded model for site 2
+2025-12-08 01:41:59 - app.main - INFO - Loaded model for site 3
+2025-12-08 01:41:59 - app.main - INFO - Loaded model for site 4
+2025-12-08 01:41:59 - app.main - INFO - Loaded model for site 5
+2025-12-08 01:41:59 - app.main - INFO - Loaded model for site 6
+2025-12-08 01:41:59 - app.main - INFO - Loaded model for site 7
+2025-12-08 01:41:59 - app.main - INFO - Loaded unified model
+2025-12-08 01:41:59 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 01:55:41 - app.api.predict - ERROR - Error generating live prediction: HTTPSConnectionPool(host='api.waqi.info', port=443): Max retries exceeded with url: /feed/geo:28.69536;77.18168/?token=affcc946182df4ae494f239e92e6f33fe04d39a2 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000202DE81FE00>, 'Connection to api.waqi.info timed out. (connect timeout=10)'))
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 198, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\connection.py", line 85, in create_connection
+    raise err
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 488, in _make_request
+    raise new_e
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 1093, in _validate_conn
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 753, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 207, in _new_conn
+    raise ConnectTimeoutError(
+    ...<2 lines>...
+    ) from e
+urllib3.exceptions.ConnectTimeoutError: (<urllib3.connection.HTTPSConnection object at 0x00000202DE81FE00>, 'Connection to api.waqi.info timed out. (connect timeout=10)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\adapters.py", line 644, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.waqi.info', port=443): Max retries exceeded with url: /feed/geo:28.69536;77.18168/?token=affcc946182df4ae494f239e92e6f33fe04d39a2 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000202DE81FE00>, 'Connection to api.waqi.info timed out. (connect timeout=10)'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\app\api\predict.py", line 79, in predict_live_site
+    live_payload = live_data_service.get_site_features(site_id)
+  File "C:\Users\dubey\Documents\sih final\backend\app\services\live_data_service.py", line 148, in get_site_features
+    raw = self._fetch_air_quality_data(coords["latitude"], coords["longitude"])
+  File "C:\Users\dubey\Documents\sih final\backend\app\services\live_data_service.py", line 87, in _fetch_air_quality_data
+    response = self.session.get(url, params=params, timeout=self.timeout)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\adapters.py", line 665, in send
+    raise ConnectTimeout(e, request=request)
+requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='api.waqi.info', port=443): Max retries exceeded with url: /feed/geo:28.69536;77.18168/?token=affcc946182df4ae494f239e92e6f33fe04d39a2 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000202DE81FE00>, 'Connection to api.waqi.info timed out. (connect timeout=10)'))
+2025-12-08 01:55:51 - app.api.predict - ERROR - Error generating 24-hour forecast: HTTPSConnectionPool(host='api.waqi.info', port=443): Max retries exceeded with url: /feed/geo:28.69536;77.18168/?token=affcc946182df4ae494f239e92e6f33fe04d39a2 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000202DE8F5D10>, 'Connection to api.waqi.info timed out. (connect timeout=10)'))
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 198, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\connection.py", line 85, in create_connection
+    raise err
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 488, in _make_request
+    raise new_e
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 1093, in _validate_conn
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 753, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 207, in _new_conn
+    raise ConnectTimeoutError(
+    ...<2 lines>...
+    ) from e
+urllib3.exceptions.ConnectTimeoutError: (<urllib3.connection.HTTPSConnection object at 0x00000202DE8F5D10>, 'Connection to api.waqi.info timed out. (connect timeout=10)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\adapters.py", line 644, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.waqi.info', port=443): Max retries exceeded with url: /feed/geo:28.69536;77.18168/?token=affcc946182df4ae494f239e92e6f33fe04d39a2 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000202DE8F5D10>, 'Connection to api.waqi.info timed out. (connect timeout=10)'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\app\api\predict.py", line 145, in predict_live_24h_site
+    live_payload = live_data_service.get_site_features(site_id)
+  File "C:\Users\dubey\Documents\sih final\backend\app\services\live_data_service.py", line 148, in get_site_features
+    raw = self._fetch_air_quality_data(coords["latitude"], coords["longitude"])
+  File "C:\Users\dubey\Documents\sih final\backend\app\services\live_data_service.py", line 87, in _fetch_air_quality_data
+    response = self.session.get(url, params=params, timeout=self.timeout)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\adapters.py", line 665, in send
+    raise ConnectTimeout(e, request=request)
+requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='api.waqi.info', port=443): Max retries exceeded with url: /feed/geo:28.69536;77.18168/?token=affcc946182df4ae494f239e92e6f33fe04d39a2 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x00000202DE8F5D10>, 'Connection to api.waqi.info timed out. (connect timeout=10)'))
+2025-12-08 02:12:29 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:12:30 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:12:30 - app.main - INFO - Loading models...
+2025-12-08 02:12:30 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:12:31 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:12:31 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:12:31 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:12:31 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:12:31 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:12:31 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:12:31 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:12:31 - app.main - INFO - Loaded unified model
+2025-12-08 02:12:31 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:16:59 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:17:00 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:17:00 - app.main - INFO - Loading models...
+2025-12-08 02:17:00 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:17:01 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:17:01 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:17:01 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:17:01 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:17:01 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:17:01 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:17:01 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:17:01 - app.main - INFO - Loaded unified model
+2025-12-08 02:17:01 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:17:02 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:17:02 - app.main - INFO - Loading models...
+2025-12-08 02:17:02 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:17:03 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:17:03 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:17:03 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:17:03 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:17:03 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:17:03 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:17:03 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:17:03 - app.main - INFO - Loaded unified model
+2025-12-08 02:17:03 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:22:02 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:22:03 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:22:03 - app.main - INFO - Loading models...
+2025-12-08 02:22:03 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:22:04 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:22:04 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:22:04 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:22:04 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:22:04 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:22:04 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:22:04 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:22:04 - app.main - INFO - Loaded unified model
+2025-12-08 02:22:04 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:23:29 - app.api.predict - ERROR - Error generating live prediction: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 565, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 292, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 719, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\ssl.py", line 1304, in recv_into
+    return self.read(nbytes, buffer)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\ssl.py", line 1138, in read
+    return self._sslobj.read(len, buffer)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\adapters.py", line 644, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\retry.py", line 474, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 565, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 292, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 719, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\ssl.py", line 1304, in recv_into
+    return self.read(nbytes, buffer)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\ssl.py", line 1138, in read
+    return self._sslobj.read(len, buffer)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\app\api\predict.py", line 79, in predict_live_site
+    )
+    
+  File "C:\Users\dubey\Documents\sih final\backend\app\services\live_data_service.py", line 148, in get_site_features
+    raw = self._fetch_air_quality_data(coords["latitude"], coords["longitude"])
+  File "C:\Users\dubey\Documents\sih final\backend\app\services\live_data_service.py", line 87, in _fetch_air_quality_data
+    response = self.session.get(url, params=params, timeout=self.timeout)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\adapters.py", line 659, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-12-08 02:23:29 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:23:30 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:23:30 - app.main - INFO - Loading models...
+2025-12-08 02:23:30 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:23:31 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:23:31 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:23:31 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:23:31 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:23:31 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:23:31 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:23:31 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:23:31 - app.main - INFO - Loaded unified model
+2025-12-08 02:23:31 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:23:32 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:23:32 - app.main - INFO - Loading models...
+2025-12-08 02:23:32 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:23:33 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:23:33 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:23:33 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:23:33 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:23:33 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:23:33 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:23:33 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:23:33 - app.main - INFO - Loaded unified model
+2025-12-08 02:23:33 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:23:33 - app.api.predict - ERROR - Error generating live prediction: HTTPSConnectionPool(host='api.waqi.info', port=443): Max retries exceeded with url: /feed/geo:28.69536;77.18168/?token=affcc946182df4ae494f239e92e6f33fe04d39a2 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x00000227256AFE00>: Failed to resolve 'api.waqi.info' ([Errno 11001] getaddrinfo failed)"))
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 198, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\connection.py", line 60, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+               ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dubey\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 488, in _make_request
+    raise new_e
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 1093, in _validate_conn
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 753, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connection.py", line 205, in _new_conn
+    raise NameResolutionError(self.host, self, e) from e
+urllib3.exceptions.NameResolutionError: <urllib3.connection.HTTPSConnection object at 0x00000227256AFE00>: Failed to resolve 'api.waqi.info' ([Errno 11001] getaddrinfo failed)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\adapters.py", line 644, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\urllib3\util\retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.waqi.info', port=443): Max retries exceeded with url: /feed/geo:28.69536;77.18168/?token=affcc946182df4ae494f239e92e6f33fe04d39a2 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x00000227256AFE00>: Failed to resolve 'api.waqi.info' ([Errno 11001] getaddrinfo failed)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\dubey\Documents\sih final\backend\app\api\predict.py", line 81, in predict_live_site
+    live_payload = live_data_service.get_site_features(site_id)
+  File "C:\Users\dubey\Documents\sih final\backend\app\services\live_data_service.py", line 148, in get_site_features
+    raw = self._fetch_air_quality_data(coords["latitude"], coords["longitude"])
+  File "C:\Users\dubey\Documents\sih final\backend\app\services\live_data_service.py", line 87, in _fetch_air_quality_data
+    response = self.session.get(url, params=params, timeout=self.timeout)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\dubey\Documents\sih final\backend\.venv\Lib\site-packages\requests\adapters.py", line 677, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='api.waqi.info', port=443): Max retries exceeded with url: /feed/geo:28.69536;77.18168/?token=affcc946182df4ae494f239e92e6f33fe04d39a2 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x00000227256AFE00>: Failed to resolve 'api.waqi.info' ([Errno 11001] getaddrinfo failed)"))
+2025-12-08 02:33:02 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:33:04 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:33:04 - app.main - INFO - Loading models...
+2025-12-08 02:33:04 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:33:05 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:33:05 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:33:05 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:33:05 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:33:05 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:33:05 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:33:05 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:33:05 - app.main - INFO - Loaded unified model
+2025-12-08 02:33:05 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:36:29 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:36:30 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:36:30 - app.main - INFO - Loading models...
+2025-12-08 02:36:30 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:36:31 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:36:31 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:36:31 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:36:31 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:36:31 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:36:31 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:36:31 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:36:31 - app.main - INFO - Loaded unified model
+2025-12-08 02:36:31 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:36:32 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:36:32 - app.main - INFO - Loading models...
+2025-12-08 02:36:32 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:36:33 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:36:33 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:36:33 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:36:33 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:36:33 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:36:33 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:36:33 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:36:33 - app.main - INFO - Loaded unified model
+2025-12-08 02:36:33 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:39:03 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:39:04 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:39:04 - app.main - INFO - Loading models...
+2025-12-08 02:39:04 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:39:05 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:39:05 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:39:05 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:39:05 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:39:05 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:39:05 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:39:05 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:39:05 - app.main - INFO - Loaded unified model
+2025-12-08 02:39:05 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:46:28 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:46:29 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:46:29 - app.main - INFO - Loading models...
+2025-12-08 02:46:29 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:46:30 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:46:30 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:46:30 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:46:30 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:46:31 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:46:31 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:46:31 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:46:31 - app.main - INFO - Loaded unified model
+2025-12-08 02:46:31 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:49:59 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:50:00 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:50:00 - app.main - INFO - Loading models...
+2025-12-08 02:50:00 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:50:01 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:50:01 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:50:01 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:50:01 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:50:01 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:50:01 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:50:01 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:50:01 - app.main - INFO - Loaded unified model
+2025-12-08 02:50:01 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:58:59 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 02:59:00 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:59:00 - app.main - INFO - Loading models...
+2025-12-08 02:59:00 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:59:01 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:59:01 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:59:01 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:59:01 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:59:01 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:59:01 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:59:01 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:59:01 - app.main - INFO - Loaded unified model
+2025-12-08 02:59:01 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 02:59:03 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 02:59:03 - app.main - INFO - Loading models...
+2025-12-08 02:59:03 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 02:59:04 - app.main - INFO - Loaded model for site 1
+2025-12-08 02:59:04 - app.main - INFO - Loaded model for site 2
+2025-12-08 02:59:04 - app.main - INFO - Loaded model for site 3
+2025-12-08 02:59:04 - app.main - INFO - Loaded model for site 4
+2025-12-08 02:59:04 - app.main - INFO - Loaded model for site 5
+2025-12-08 02:59:04 - app.main - INFO - Loaded model for site 6
+2025-12-08 02:59:04 - app.main - INFO - Loaded model for site 7
+2025-12-08 02:59:04 - app.main - INFO - Loaded unified model
+2025-12-08 02:59:04 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:01:20 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 03:01:22 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:01:22 - app.main - INFO - Loading models...
+2025-12-08 03:01:22 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:01:22 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:01:22 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:01:22 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:01:22 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:01:22 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:01:22 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:01:22 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:01:23 - app.main - INFO - Loaded unified model
+2025-12-08 03:01:23 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:01:24 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:01:24 - app.main - INFO - Loading models...
+2025-12-08 03:01:24 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:01:25 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:01:25 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:01:25 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:01:25 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:01:25 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:01:25 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:01:25 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:01:25 - app.main - INFO - Loaded unified model
+2025-12-08 03:01:25 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:01:29 - app.api.predict - INFO - Historical data: 337 points from 2024-05-31 00:00:00 to 2024-06-30 00:00:00
+2025-12-08 03:01:31 - app.api.predict - INFO - Historical data: 337 points from 2024-05-31 00:00:00 to 2024-06-30 00:00:00
+2025-12-08 03:01:53 - app.api.predict - INFO - Historical data: 337 points from 2024-05-31 00:00:00 to 2024-06-30 00:00:00
+2025-12-08 03:02:02 - app.api.predict - INFO - Historical data: 337 points from 2024-05-31 00:00:00 to 2024-06-30 00:00:00
+2025-12-08 03:02:05 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 03:02:07 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:02:07 - app.main - INFO - Loading models...
+2025-12-08 03:02:07 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:02:07 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:02:07 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:02:07 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:02:07 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:02:07 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:02:07 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:02:07 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:02:07 - app.main - INFO - Loaded unified model
+2025-12-08 03:02:07 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:02:09 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:02:09 - app.main - INFO - Loading models...
+2025-12-08 03:02:09 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:02:09 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:02:09 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:02:09 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:02:09 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:02:09 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:02:09 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:02:09 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:02:09 - app.main - INFO - Loaded unified model
+2025-12-08 03:02:09 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:03:26 - app.api.predict - INFO - Historical data: 337 points, 15 unique days from 2024-05-31 00:00:00 to 2024-06-30 00:00:00
+2025-12-08 03:03:40 - app.api.predict - INFO - Historical data: 337 points, 15 unique days from 2024-05-31 00:00:00 to 2024-06-30 00:00:00
+2025-12-08 03:03:45 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 03:03:46 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:03:46 - app.main - INFO - Loading models...
+2025-12-08 03:03:46 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:03:47 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:03:47 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:03:47 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:03:47 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:03:47 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:03:47 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:03:47 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:03:47 - app.main - INFO - Loaded unified model
+2025-12-08 03:03:47 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:03:48 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:03:48 - app.main - INFO - Loading models...
+2025-12-08 03:03:48 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:03:49 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:03:49 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:03:49 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:03:49 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:03:49 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:03:49 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:03:49 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:03:49 - app.main - INFO - Loaded unified model
+2025-12-08 03:03:49 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:04:08 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30
+2025-12-08 03:06:14 - app.api.predict - INFO - Historical data: 25 points, 2 unique days from 2024-06-28 to 2024-06-30
+2025-12-08 03:06:16 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30
+2025-12-08 03:06:21 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 03:06:23 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:06:23 - app.main - INFO - Loading models...
+2025-12-08 03:06:23 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:06:23 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:06:23 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:06:23 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:06:23 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:06:23 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:06:23 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:06:23 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:06:23 - app.main - INFO - Loaded unified model
+2025-12-08 03:06:23 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:06:25 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:06:25 - app.main - INFO - Loading models...
+2025-12-08 03:06:25 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:06:25 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:06:25 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:06:25 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:06:25 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:06:25 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:06:25 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:06:25 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:06:25 - app.main - INFO - Loaded unified model
+2025-12-08 03:06:25 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:08:14 - app.api.predict - WARNING - No data found for the last 7 days from today 2025-12-08. CSV data may be older.
+2025-12-08 03:08:14 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 03:08:15 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:08:15 - app.main - INFO - Loading models...
+2025-12-08 03:08:15 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:08:16 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:08:16 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:08:16 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:08:16 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:08:16 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:08:16 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:08:16 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:08:16 - app.main - INFO - Loaded unified model
+2025-12-08 03:08:16 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:08:17 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:08:17 - app.main - INFO - Loading models...
+2025-12-08 03:08:17 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:08:18 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:08:18 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:08:18 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:08:18 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:08:18 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:08:18 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:08:18 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:08:18 - app.main - INFO - Loaded unified model
+2025-12-08 03:08:18 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:08:20 - app.api.predict - INFO - Historical data: 25 points, 2 unique days from 2024-06-28 to 2024-06-30 (requested: last 7 days from most recent date 2024-06-30)
+2025-12-08 03:08:25 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30 (requested: last 30 days from most recent date 2024-06-30)
+2025-12-08 03:08:29 - app.api.predict - INFO - Historical data: 25 points, 2 unique days from 2024-06-28 to 2024-06-30 (requested: last 7 days from most recent date 2024-06-30)
+2025-12-08 03:08:40 - app.api.predict - INFO - Historical data: 25 points, 2 unique days from 2024-06-28 to 2024-06-30 (requested: last 7 days from most recent date 2024-06-30)
+2025-12-08 03:08:42 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30 (requested: last 30 days from most recent date 2024-06-30)
+2025-12-08 03:11:03 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30 (requested: last 30 days from most recent date 2024-06-30)
+2025-12-08 03:11:05 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30 (requested: last 30 days from most recent date 2024-06-30)
+2025-12-08 03:11:10 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 03:11:12 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:11:12 - app.main - INFO - Loading models...
+2025-12-08 03:11:12 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:11:13 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:11:13 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:11:13 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:11:13 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:11:13 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:11:13 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:11:13 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:11:13 - app.main - INFO - Loaded unified model
+2025-12-08 03:11:13 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:11:36 - app.api.predict - INFO - CSV data is older (most recent: 2024-06-30, today: 2025-12-08). Using most recent CSV date as reference.
+2025-12-08 03:11:36 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30 (requested: last 30 days from reference date 2024-06-30)
+2025-12-08 03:11:41 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 03:11:43 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:11:43 - app.main - INFO - Loading models...
+2025-12-08 03:11:43 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:11:45 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:11:45 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:11:45 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:11:45 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:11:45 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:11:45 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:11:45 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:11:45 - app.main - INFO - Loaded unified model
+2025-12-08 03:11:45 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:12:56 - app.api.predict - INFO - CSV data is older (most recent: 2024-06-30, today: 2025-12-08). Using most recent CSV date as reference.
+2025-12-08 03:12:56 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30 (requested: last 30 days from reference date 2024-06-30)
+2025-12-08 03:15:05 - app.api.predict - INFO - CSV data is older (most recent: 2024-06-30, today: 2025-12-08). Using most recent CSV date as reference.
+2025-12-08 03:15:05 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30 (requested: last 30 days from reference date 2024-06-30)
+2025-12-08 03:15:33 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 03:15:35 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:15:35 - app.main - INFO - Loading models...
+2025-12-08 03:15:35 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:15:36 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:15:36 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:15:36 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:15:36 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:15:36 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:15:36 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:15:36 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:15:36 - app.main - INFO - Loaded unified model
+2025-12-08 03:15:36 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:15:36 - app.api.predict - INFO - CSV data is older (most recent: 2024-06-30, today: 2025-12-08). Using most recent CSV date as reference.
+2025-12-08 03:15:36 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30 (requested: last 30 days from reference date 2024-06-30)
+2025-12-08 03:16:06 - app.api.predict - INFO - CSV data is older (most recent: 2024-06-30, today: 2025-12-08). Using most recent CSV date as reference.
+2025-12-08 03:16:06 - app.api.predict - INFO - Historical data: 313 points, 14 unique days from 2024-06-01 to 2024-06-30 (requested: last 30 days from reference date 2024-06-30)
+2025-12-08 03:16:17 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 03:16:18 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:16:18 - app.main - INFO - Loading models...
+2025-12-08 03:16:18 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:16:19 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:16:19 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:16:19 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:16:19 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:16:19 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:16:19 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:16:19 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:16:19 - app.main - INFO - Loaded unified model
+2025-12-08 03:16:20 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:16:21 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 03:16:21 - app.main - INFO - Loading models...
+2025-12-08 03:16:21 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 03:16:22 - app.main - INFO - Loaded model for site 1
+2025-12-08 03:16:22 - app.main - INFO - Loaded model for site 2
+2025-12-08 03:16:22 - app.main - INFO - Loaded model for site 3
+2025-12-08 03:16:22 - app.main - INFO - Loaded model for site 4
+2025-12-08 03:16:22 - app.main - INFO - Loaded model for site 5
+2025-12-08 03:16:22 - app.main - INFO - Loaded model for site 6
+2025-12-08 03:16:22 - app.main - INFO - Loaded model for site 7
+2025-12-08 03:16:22 - app.main - INFO - Loaded unified model
+2025-12-08 03:16:22 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 03:16:26 - app.api.predict - WARNING - No data found for the last 30 days from TODAY 2025-12-08. CSV data may be older than the requested date range.
+2025-12-08 03:16:48 - app.api.predict - WARNING - No data found for the last 30 days from TODAY 2025-12-08. CSV data may be older than the requested date range.
