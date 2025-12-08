@@ -88,6 +88,12 @@ async def get_historical_data(site_id: int, days: int = 30, hours: int = None):
             hours_to_fetch = min(hours, 24)  # Max 24 hours
             time_period = f"{hours_to_fetch} hours"
         else:
+            # Validate days parameter: must be positive and within valid range
+            if days <= 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"days parameter must be positive (1-30), got {days}"
+                )
             if days > 30:
                 days = 30
             hours_to_fetch = days * 24
@@ -122,35 +128,44 @@ async def get_historical_data(site_id: int, days: int = 30, hours: int = None):
             # For hours, get last N hours of data points
             df_recent = df.head(hours_to_fetch).sort_values('datetime', ascending=True)
         else:
-            # For days, get all data from the last N calendar days from TODAY ONLY
-            # Use today's date as the reference point (no fallback to CSV dates)
+            # For days, get all data from the last N calendar days from the most recent date in CSV
+            # Use the most recent date in the CSV as the reference point (handles legacy data)
             from datetime import datetime
-            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             
-            # Calculate cutoff: N days before today (at start of day)
-            # For 7 days: if today is Dec 8, cutoff is Dec 1 (includes Dec 1-8, 7 days)
-            # For 30 days: if today is Dec 8, cutoff is Nov 8 (includes Nov 8 - Dec 8, 30 days)
-            cutoff_date = today - pd.Timedelta(days=days - 1)  # days-1 because we want inclusive
+            # Find the most recent date in the CSV data
+            if len(df) == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"No data found in CSV file for site {site_id}"
+                )
             
-            # Filter to only include data from the last N calendar days from TODAY (inclusive)
-            df_recent = df[(df['datetime'] >= cutoff_date) & (df['datetime'] <= today)].sort_values('datetime', ascending=True)
+            most_recent_date = df['datetime'].max()
+            reference_date = most_recent_date.replace(hour=0, minute=0, second=0, microsecond=0)
             
-            # Additional validation: ensure we only have the last N unique calendar days from today
+            # Calculate cutoff: N days before the most recent date (at start of day)
+            # For 7 days: if most recent is Dec 8, cutoff is Dec 1 (includes Dec 1-8, 7 days)
+            # For 30 days: if most recent is Dec 8, cutoff is Nov 8 (includes Nov 8 - Dec 8, 30 days)
+            cutoff_date = reference_date - pd.Timedelta(days=days - 1)  # days-1 because we want inclusive
+            
+            # Filter to only include data from the last N calendar days from the most recent date (inclusive)
+            df_recent = df[(df['datetime'] >= cutoff_date) & (df['datetime'] <= most_recent_date)].sort_values('datetime', ascending=True)
+            
+            # Additional validation: ensure we only have the last N unique calendar days from the reference date
             if len(df_recent) > 0:
                 # Get unique dates and sort
                 unique_dates = sorted(df_recent['datetime'].dt.date.unique(), reverse=True)
                 
-                # Take only the last N calendar days from today
+                # Take only the last N calendar days from the reference date
                 if len(unique_dates) > days:
-                    # Get the N most recent dates (closest to today)
+                    # Get the N most recent dates (closest to reference date)
                     unique_dates_to_keep = unique_dates[:days]
                     # Filter to only those dates
                     df_recent = df_recent[df_recent['datetime'].dt.date.isin(unique_dates_to_keep)]
                 
                 unique_dates_final = sorted(df_recent['datetime'].dt.date.unique())
-                logger.info(f"Historical data: {len(df_recent)} points, {len(unique_dates_final)} unique days from {unique_dates_final[0] if unique_dates_final else 'N/A'} to {unique_dates_final[-1] if unique_dates_final else 'N/A'} (requested: last {days} days from TODAY {today.date()})")
+                logger.info(f"Historical data: {len(df_recent)} points, {len(unique_dates_final)} unique days from {unique_dates_final[0] if unique_dates_final else 'N/A'} to {unique_dates_final[-1] if unique_dates_final else 'N/A'} (requested: last {days} days from most recent date {reference_date.date()})")
             else:
-                logger.warning(f"No data found for the last {days} days from TODAY {today.date()}. CSV data may be older than the requested date range.")
+                logger.warning(f"No data found for the last {days} days from the most recent date {reference_date.date()} in CSV. This may indicate insufficient data in the requested range.")
         
         # Convert to list of dictionaries
         historical_data = []

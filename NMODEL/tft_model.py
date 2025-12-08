@@ -248,6 +248,9 @@ class TemporalFusionTransformer(nn.Module):
         # Historical target embedding (fix: define in __init__, not in forward)
         self.y_embed = nn.Linear(1, hidden_size)
         
+        # Initialize weights to prevent NaN
+        self._initialize_weights()
+        
         # LSTM encoder
         self.lstm = nn.LSTM(
             hidden_size, hidden_size, 
@@ -281,6 +284,31 @@ class TemporalFusionTransformer(nn.Module):
         )
         
         self.dropout = nn.Dropout(dropout)
+        
+        # Initialize weights to prevent NaN
+        self._initialize_weights()
+    
+    def _initialize_weights(self):
+        """Initialize weights to prevent NaN/Inf issues."""
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                # Xavier uniform initialization with small gain
+                nn.init.xavier_uniform_(module.weight, gain=0.1)
+                if module.bias is not None:
+                    nn.init.constant_(module.bias, 0.0)
+            elif isinstance(module, nn.LSTM):
+                # Initialize LSTM weights
+                for name, param in module.named_parameters():
+                    if 'weight_ih' in name:
+                        nn.init.xavier_uniform_(param.data, gain=0.1)
+                    elif 'weight_hh' in name:
+                        nn.init.orthogonal_(param.data, gain=0.1)
+                    elif 'bias' in name:
+                        nn.init.constant_(param.data, 0.0)
+                        # Set forget gate bias to 1 (helps with gradient flow)
+                        n = param.size(0)
+                        start, end = n // 4, n // 2
+                        param.data[start:end].fill_(1.0)
     
     def forward(self, X, y_history, static=None, known_future=None):
         """
@@ -498,7 +526,9 @@ class TFTModel:
         ).to(self.device)
         
         # Optimizer and scheduler
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        # Lower learning rate to prevent NaN (reduce from 1e-3 to 5e-4)
+        effective_lr = min(self.learning_rate, 5e-4)  # Cap at 5e-4
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=effective_lr)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
         criterion = nn.L1Loss()  # MAE loss
         
@@ -523,6 +553,11 @@ class TFTModel:
                 # Forward pass
                 pred = self.model(X_batch, y_history, static, known_future)
                 
+                # Check for NaN in predictions before computing loss
+                if torch.any(torch.isnan(pred)) or torch.any(torch.isinf(pred)):
+                    print(f"Warning: NaN/Inf in model predictions at epoch {epoch + 1}, skipping batch")
+                    continue
+                
                 # For single-step prediction
                 if self.output_horizon == 1:
                     loss = criterion(pred.squeeze(), y_target.squeeze())
@@ -532,15 +567,31 @@ class TFTModel:
                 # Apply sample weights
                 loss = (loss * weights.squeeze()).mean()
                 
+                # Check for NaN/Inf loss before backpropagation
+                if torch.isnan(loss) or torch.isinf(loss):
+                    print(f"Warning: NaN/Inf loss detected at epoch {epoch + 1}, skipping batch")
+                    continue
+                
                 # Backward pass
                 loss.backward()
+                
+                # Gradient clipping to prevent exploding gradients
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                
                 optimizer.step()
                 
-                train_loss += loss.item()
+                loss_value = loss.item()
+                # Check for NaN in loss value
+                if np.isnan(loss_value) or np.isinf(loss_value):
+                    print(f"Warning: NaN/Inf in loss.item() at epoch {epoch + 1}, skipping batch")
+                    continue
+                
+                train_loss += loss_value
             
             # Validation
             self.model.eval()
             val_loss = 0.0
+            val_batch_count = 0
             with torch.no_grad():
                 for batch in val_loader:
                     X_batch = batch['X'].to(self.device)
@@ -551,15 +602,45 @@ class TFTModel:
                     
                     pred = self.model(X_batch, y_history, static, known_future)
                     
+                    # Check for NaN in validation predictions
+                    if torch.any(torch.isnan(pred)) or torch.any(torch.isinf(pred)):
+                        print(f"Warning: NaN/Inf in validation predictions at epoch {epoch + 1}, skipping batch")
+                        continue
+                    
                     if self.output_horizon == 1:
                         loss = criterion(pred.squeeze(), y_target.squeeze())
                     else:
                         loss = criterion(pred, y_target)
                     
-                    val_loss += loss.item()
+                    # Check for NaN in validation loss
+                    if torch.isnan(loss) or torch.isinf(loss):
+                        print(f"Warning: NaN/Inf in validation loss at epoch {epoch + 1}, skipping batch")
+                        continue
+                    
+                    loss_value = loss.item()
+                    if np.isnan(loss_value) or np.isinf(loss_value):
+                        print(f"Warning: NaN/Inf in validation loss.item() at epoch {epoch + 1}, skipping batch")
+                        continue
+                    
+                    val_loss += loss_value
+                    val_batch_count += 1
+            
+            # Handle case where all validation batches were skipped
+            if val_batch_count == 0:
+                print(f"Error: All validation batches had NaN/Inf at epoch {epoch + 1}. Stopping training.")
+                break
+            
+            # Check for NaN in accumulated losses
+            if np.isnan(train_loss) or np.isinf(train_loss):
+                print(f"Error: NaN/Inf in train_loss at epoch {epoch + 1}. Stopping training.")
+                break
+            
+            if np.isnan(val_loss) or np.isinf(val_loss):
+                print(f"Error: NaN/Inf in val_loss at epoch {epoch + 1}. Stopping training.")
+                break
             
             train_loss /= len(train_loader)
-            val_loss /= len(val_loader)
+            val_loss /= val_batch_count  # Use actual count, not len(val_loader) in case batches were skipped
             
             scheduler.step(val_loss)
             
