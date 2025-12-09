@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, Component } from 'react';
 import Header from '@/components/Header';
 import { RefreshCw, AlertCircle, Clock, MapPin, Car, CheckCircle2 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -29,7 +29,74 @@ import InteractiveForecastTool from '@/components/InteractiveForecastTool';
 import HealthStatus from '@/components/HealthStatus';
 import { ResponsiveLine } from '@nivo/line';
 import { parseCSV, convertToChartData, CSVRow } from '@/utils/csvReader';
-import DelhiAirMap from '@/components/DelhiAirMap';
+const DelhiAirMap = React.lazy(() => import('@/components/DelhiAirMap'));
+
+// Error boundary for map component
+class MapErrorBoundary extends Component<
+  { children: React.ReactNode; fallback?: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Map component error:', error);
+    console.error('Error info:', errorInfo);
+    console.error('Error stack:', error.stack);
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className={`rounded-xl border p-6 ${this.props.fallback ? '' : 'bg-slate-800 border-slate-700'}`}>
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-medium text-slate-300 mb-1">
+                Map temporarily unavailable
+              </p>
+              <p className="text-xs text-slate-400 mb-3">
+                {this.state.error?.message || 'An error occurred while loading the map'}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={this.handleRetry}
+                className="px-4 py-2 text-sm font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700 transition-colors"
+              >
+                Retry
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 text-sm font-medium rounded-md bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors"
+              >
+                Refresh Page
+              </button>
+            </div>
+            <details className="text-xs text-slate-500 mt-3">
+              <summary className="cursor-pointer hover:text-slate-400">Show error details</summary>
+              <pre className="mt-2 p-2 bg-slate-900 rounded text-xs overflow-auto max-h-32">
+                {this.state.error?.stack || 'No stack trace available'}
+              </pre>
+            </details>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 type TabType = 'overview' | 'health' ;
 type TimeRange = 1 | 24 | 48;
 
@@ -466,7 +533,15 @@ export default function Dashboard() {
                   )}
 
                   {/* Delhi Heatmaps */}
-                  <DelhiAirMap />
+                  <Suspense fallback={
+                    <div className={`rounded-xl border p-6 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Loading map...</p>
+                    </div>
+                  }>
+                    <MapErrorBoundary>
+                      <DelhiAirMap onRefresh={() => fetchAllData(selectedSite, timeRange)} />
+                    </MapErrorBoundary>
+                  </Suspense>
 
                   {/* Time Range Selector & Trend Chart */}
                   <div className={`rounded-xl border p-6 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>

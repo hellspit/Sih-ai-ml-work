@@ -1,13 +1,10 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import type { LatLngBoundsExpression, LatLngTuple } from 'leaflet';
 
-// Only import leaflet CSS on client side
-if (typeof window !== 'undefined') {
-  import('leaflet/dist/leaflet.css');
-  import('leaflet.heat');
-}
+// Define types locally to avoid importing from leaflet
+type LatLngTuple = [number, number];
+type LatLngBoundsExpression = [[number, number], [number, number]];
 
 type Pollutant = 'O3' | 'NO2';
 type Dataset = 'actual' | 'predicted';
@@ -62,30 +59,87 @@ export default function DelhiAirMapContent({
 
   // Dynamically import react-leaflet and leaflet only on client side
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    // Triple-check we're on client - this should never run on server
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      console.warn('DelhiAirMapContent: Skipping SSR');
+      return;
+    }
     
+    let isCancelled = false;
+    
+    // Import CSS first (non-blocking)
     Promise.all([
-      import('react-leaflet'),
-      import('leaflet'),
-      import('leaflet/dist/leaflet.css'),
-      import('leaflet.heat'),
-      import('leaflet/dist/images/marker-icon-2x.png'),
-      import('leaflet/dist/images/marker-icon.png'),
-      import('leaflet/dist/images/marker-shadow.png'),
-    ]).then(([reactLeaflet, L, , , markerIcon2x, markerIcon, markerShadow]) => {
+      import('leaflet/dist/leaflet.css').catch((err) => {
+        console.warn('Failed to load leaflet CSS:', err);
+        return null;
+      }),
+    ]).then(() => {
+      if (isCancelled) return;
+      
+      // Then import the actual modules
+      return Promise.all([
+        import('react-leaflet'),
+        import('leaflet'),
+        import('leaflet/dist/images/marker-icon-2x.png').catch(() => null),
+        import('leaflet/dist/images/marker-icon.png').catch(() => null),
+        import('leaflet/dist/images/marker-shadow.png').catch(() => null),
+        // Try to load leaflet.heat, but don't fail if it doesn't load
+        import('leaflet.heat').catch((err) => {
+          console.warn('leaflet.heat not available, heatmap will be disabled:', err);
+          return null;
+        }),
+      ]);
+    }).then(([reactLeaflet, L, markerIcon2x, markerIcon, markerShadow, leafletHeat]) => {
+      if (isCancelled) return;
+      
+      // Final check - ensure we're still on client
+      if (typeof window === 'undefined') {
+        console.warn('DelhiAirMapContent: Window undefined after import');
+        return;
+      }
+      
+      if (!reactLeaflet || !L) {
+        throw new Error('Failed to load react-leaflet or leaflet');
+      }
+      
+      // Verify react-leaflet exports are valid
+      if (!reactLeaflet.MapContainer || !reactLeaflet.TileLayer) {
+        throw new Error('react-leaflet exports are invalid');
+      }
+      
       const { MapContainer, TileLayer, Marker, Popup, useMap } = reactLeaflet;
       
+      // Register leaflet.heat if available
+      if (leafletHeat && typeof (L.default as any).heatLayer === 'undefined') {
+        try {
+          // Try to register the heat plugin
+          if (leafletHeat.default) {
+            (L.default as any).heatLayer = leafletHeat.default;
+          } else if ((leafletHeat as any).heatLayer) {
+            (L.default as any).heatLayer = (leafletHeat as any).heatLayer;
+          }
+        } catch (e) {
+          console.warn('Could not register leaflet.heat plugin:', e);
+        }
+      }
+      
       // Fix marker icons for Vite builds
-      const DefaultIcon = L.default.icon({
-        iconUrl: markerIcon.default,
-        iconRetinaUrl: markerIcon2x.default,
-        shadowUrl: markerShadow.default,
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-      });
-      L.default.Marker.prototype.options.icon = DefaultIcon;
+      try {
+        if (markerIcon && markerIcon2x && markerShadow) {
+          const DefaultIcon = L.default.icon({
+            iconUrl: markerIcon.default || markerIcon,
+            iconRetinaUrl: markerIcon2x.default || markerIcon2x,
+            shadowUrl: markerShadow.default || markerShadow,
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+          });
+          L.default.Marker.prototype.options.icon = DefaultIcon;
+        }
+      } catch (e) {
+        console.warn('Failed to set marker icons (using defaults):', e);
+      }
 
       // Create HeatLayer component
       const HeatLayerComponent: React.FC<{
@@ -98,17 +152,32 @@ export default function DelhiAirMapContent({
 
         useEffect(() => {
           if (!map) return;
-          const layer = (L.default as any).heatLayer(points, {
-            radius,
-            blur,
-            maxZoom: 17,
-            minOpacity: 0.15,
-            gradient,
-          });
-          layer.addTo(map);
-          return () => {
-            map.removeLayer(layer);
-          };
+          
+          // Check if heatLayer is available
+          if (typeof (L.default as any).heatLayer !== 'function') {
+            console.warn('leaflet.heat not available, skipping heat layer');
+            return;
+          }
+          
+          try {
+            const layer = (L.default as any).heatLayer(points, {
+              radius,
+              blur,
+              maxZoom: 17,
+              minOpacity: 0.15,
+              gradient,
+            });
+            layer.addTo(map);
+            return () => {
+              try {
+                map.removeLayer(layer);
+              } catch (e) {
+                // Ignore cleanup errors
+              }
+            };
+          } catch (e) {
+            console.error('Error creating heat layer:', e);
+          }
         }, [map, points, radius, blur, gradient]);
 
         return null;
@@ -121,14 +190,18 @@ export default function DelhiAirMapContent({
         useEffect(() => {
           if (!map || sites.length === 0) return;
           
-          const bounds = L.default.latLngBounds(
-            sites.map(site => [site.lat, site.lon] as LatLngTuple)
-          );
-          
-          map.fitBounds(bounds, {
-            padding: [50, 50],
-            maxZoom: 12,
-          });
+          try {
+            const bounds = L.default.latLngBounds(
+              sites.map(site => [site.lat, site.lon] as LatLngTuple)
+            );
+            
+            map.fitBounds(bounds, {
+              padding: [50, 50],
+              maxZoom: 12,
+            });
+          } catch (e) {
+            console.error('Error fitting bounds:', e);
+          }
         }, [map, sites]);
 
         return null;
@@ -143,7 +216,16 @@ export default function DelhiAirMapContent({
         FitBounds: FitBoundsComponent,
       });
       setIsMounted(true);
+      console.log('Map components loaded successfully');
+    }).catch((error) => {
+      console.error('Error loading map components:', error);
+      // Set a flag to show error state
+      setIsMounted(false);
     });
+    
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   const heatPoints = useMemo(() => {
@@ -159,8 +241,12 @@ export default function DelhiAirMapContent({
   // Don't render map until components are loaded and mounted
   if (!isMounted || !MapComponents) {
     return (
-      <div className="relative h-[420px] w-full flex items-center justify-center">
-        <p className="text-sm text-slate-600">Loading map...</p>
+      <div className="relative h-[420px] w-full flex items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-lg">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mb-2"></div>
+          <p className="text-sm text-slate-600 dark:text-slate-400">Loading map...</p>
+          <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">This may take a few seconds</p>
+        </div>
       </div>
     );
   }

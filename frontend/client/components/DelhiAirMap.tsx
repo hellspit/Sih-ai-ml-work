@@ -1,12 +1,27 @@
 'use client';
 
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { LatLngBoundsExpression, LatLngTuple } from 'leaflet';
+import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { RefreshCw, Flame, Droplets } from 'lucide-react';
+import ClientOnlyMap from './ClientOnlyMap';
+
+// Define types locally to avoid importing from leaflet
+type LatLngTuple = [number, number];
+type LatLngBoundsExpression = [[number, number], [number, number]];
 
 // Dynamically import the map content component to avoid SSR issues
-const DelhiAirMapContent = lazy(() => import('./DelhiAirMapContent').then(mod => ({ default: mod.default })));
+// Only import when actually needed (inside ClientOnlyMap wrapper)
+// Use a function to ensure it's only called on client side
+const DelhiAirMapContent = lazy(() => {
+  // Double-check we're on client before importing
+  if (typeof window === 'undefined') {
+    // Return a no-op component for SSR
+    return Promise.resolve({ 
+      default: () => null as any
+    } as any);
+  }
+  return import('./DelhiAirMapContent').then(mod => ({ default: mod.default }));
+});
 
 type Pollutant = 'O3' | 'NO2';
 type Dataset = 'actual' | 'predicted';
@@ -46,16 +61,11 @@ const pollutantRanges: Record<Pollutant, { min: number; max: number; color: stri
 export default function DelhiAirMap({ sites, onRefresh }: DelhiAirMapProps) {
   const { theme } = useTheme();
   const [dataset, setDataset] = useState<Dataset>('actual');
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Ensure component only renders on client side
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const data = sites ?? defaultSites;
   
   // Calculate center and bounds dynamically from site locations
+  // These hooks must be called unconditionally (before any early returns)
   const center: LatLngTuple = useMemo(() => {
     if (data.length === 0) return [28.61, 77.21];
     const avgLat = data.reduce((sum, site) => sum + site.lat, 0) / data.length;
@@ -96,73 +106,76 @@ export default function DelhiAirMap({ sites, onRefresh }: DelhiAirMapProps) {
     []
   );
 
-  const tileUrl =
-    theme === 'dark'
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  const tileUrl = useMemo(
+    () =>
+      theme === 'dark'
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    [theme]
+  );
 
   return (
-    <div className={`rounded-xl border ${theme === 'dark' ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200'} overflow-hidden`}>
-      <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Delhi O₃ & NO₂ Heatmaps</h3>
-          <p className={`text-sm ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Side-by-side intensity for Delhi sites only</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className={`flex rounded-lg p-1 ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
-            {(['actual', 'predicted'] as Dataset[]).map((d) => (
+    <ClientOnlyMap>
+      <div className={`rounded-xl border ${theme === 'dark' ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200'} overflow-hidden`}>
+        <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Delhi O₃ & NO₂ Heatmaps</h3>
+            <p className={`text-sm ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Side-by-side intensity for Delhi sites only</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className={`flex rounded-lg p-1 ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
+              {(['actual', 'predicted'] as Dataset[]).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDataset(d)}
+                  className={`px-3 py-1.5 text-sm rounded-md font-medium transition ${
+                    dataset === d
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : theme === 'dark'
+                      ? 'text-slate-200 hover:bg-slate-700'
+                      : 'text-slate-700 hover:bg-white'
+                  }`}
+                >
+                  {d === 'actual' ? 'Actual' : 'Predicted'}
+                </button>
+              ))}
+            </div>
+            {onRefresh && (
               <button
-                key={d}
-                onClick={() => setDataset(d)}
-                className={`px-3 py-1.5 text-sm rounded-md font-medium transition ${
-                  dataset === d
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : theme === 'dark'
-                    ? 'text-slate-200 hover:bg-slate-700'
-                    : 'text-slate-700 hover:bg-white'
+                onClick={onRefresh}
+                className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                  theme === 'dark'
+                    ? 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
-                {d === 'actual' ? 'Actual' : 'Predicted'}
+                <RefreshCw className="w-4 h-4" /> Refresh
               </button>
-            ))}
+            )}
           </div>
-          {onRefresh && (
-            <button
-              onClick={onRefresh}
-              className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                theme === 'dark'
-                  ? 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
-                  : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-              }`}
-            >
-              <RefreshCw className="w-4 h-4" /> Refresh
-            </button>
-          )}
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
-        {(['NO2', 'O3'] as Pollutant[]).map((pollutant) => {
-          const range = pollutantRanges[pollutant];
+        <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
+          {(['NO2', 'O3'] as Pollutant[]).map((pollutant) => {
+            const range = pollutantRanges[pollutant];
 
-          return (
-            <div key={pollutant} className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {range.icon}
-                  <div>
-                    <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{pollutant === 'O3' ? 'O₃' : 'NO₂'} Heatmap</p>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Delhi focus • {dataset === 'actual' ? 'Actual readings' : 'Model predictions'}</p>
+            return (
+              <div key={pollutant} className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {range.icon}
+                    <div>
+                      <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{pollutant === 'O3' ? 'O₃' : 'NO₂'} Heatmap</p>
+                      <p className={`text-xs ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Delhi focus • {dataset === 'actual' ? 'Actual readings' : 'Model predictions'}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <Suspense fallback={
-                <div className="relative h-[420px] w-full flex items-center justify-center">
-                  <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Loading map...</p>
-                </div>
-              }>
-                {isMounted && (
+                <Suspense fallback={
+                  <div className="relative h-[420px] w-full flex items-center justify-center">
+                    <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Loading map...</p>
+                  </div>
+                }>
                   <DelhiAirMapContent
                     data={data}
                     pollutant={pollutant}
@@ -173,18 +186,13 @@ export default function DelhiAirMap({ sites, onRefresh }: DelhiAirMapProps) {
                     gradient={gradient}
                     range={range}
                   />
-                )}
-                {!isMounted && (
-                  <div className="relative h-[420px] w-full flex items-center justify-center">
-                    <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Loading map...</p>
-                  </div>
-                )}
-              </Suspense>
-            </div>
-          );
-        })}
+                </Suspense>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </ClientOnlyMap>
   );
 }
 
