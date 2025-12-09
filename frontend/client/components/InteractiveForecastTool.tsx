@@ -283,43 +283,23 @@ export default function InteractiveForecastTool({
     setError(null);
 
     try {
-      let inputData: PredictInput[];
+      // Send prediction request to backend API
+      const result = await apiClient.predictSite(siteId, {
+        year: formData.year,
+        month: formData.month,
+        day: formData.day,
+        hour: formData.hour,
+        no2_value: formData.NO2_forecast,
+        o3_value: formData.O3_forecast,
+        temperature: formData.T_forecast,
+        humidity: formData.q_forecast,
+        wind_speed: Math.sqrt(formData.u_forecast ** 2 + formData.v_forecast ** 2),
+      } as any);
       
-      // If CSV data is loaded, use it; otherwise generate 24-hour forecast from form data
-      if (csvData && csvData.length > 0) {
-        inputData = csvData.map((row) => ({
-          year: row.year,
-          month: row.month,
-          day: row.day,
-          hour: row.hour,
-          O3_forecast: row.O3_forecast,
-          NO2_forecast: row.NO2_forecast,
-          T_forecast: row.T_forecast,
-          q_forecast: row.q_forecast,
-          u_forecast: row.u_forecast,
-          v_forecast: row.v_forecast,
-          w_forecast: row.w_forecast,
-          blh_forecast: row.blh_forecast,
-          NO2_satellite: row.NO2_satellite,
-          HCHO_satellite: row.HCHO_satellite,
-          SZA_deg: row.SZA_deg,
-        }));
-      } else {
-        // Generate 24-hour forecast from single input
-        inputData = generate24HourInputData(formData);
-      }
-
-      const request = {
-        input_data: inputData,
-        site_id: siteId,
-        forecast_hours: inputData.length,
-      };
-
-      const result = await apiClient.predictSite(siteId, request);
       setForecastResult(result);
       onForecastGenerated(result);
-    } catch (err: any) {
-      const errorMessage = err?.message || 'Failed to generate forecast';
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate forecast from backend';
       setError(errorMessage);
       console.error('Error generating forecast:', err);
     } finally {

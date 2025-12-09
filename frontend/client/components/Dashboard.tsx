@@ -1,7 +1,4 @@
-
-'use client';
-
-import React, { useState, useEffect, Suspense, Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { RefreshCw, AlertCircle, Clock, MapPin, Car, CheckCircle2 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -11,92 +8,15 @@ import {
   PredictResponse,
   ModelDetailResponse 
 } from '@shared/api';
-import { 
-  generateDummyLivePrediction,
-  generateDummy24HourForecast,
-  generateDummyHealthStatus,
-  generateDummyModelDetail,
-  generateDummyPollutantMetrics,
-  PollutantMetrics,
-  
-} from '@/services/dummyData';
+import apiClient from '@/services/apiClient';
 import { Button } from '@/components/ui/button';
 import PollutantGauge from '@/components/PollutantGauge';
-import HighestPollutants from '@/components/HighestPollutants';
 import SiteSelector from '@/components/SiteSelector';
 import ForecastChart from '@/components/ForecastChart';
 import InteractiveForecastTool from '@/components/InteractiveForecastTool';
 import HealthStatus from '@/components/HealthStatus';
 import { ResponsiveLine } from '@nivo/line';
-import { parseCSV, convertToChartData, CSVRow } from '@/utils/csvReader';
-const DelhiAirMap = React.lazy(() => import('@/components/DelhiAirMap'));
-
-// Error boundary for map component
-class MapErrorBoundary extends Component<
-  { children: React.ReactNode; fallback?: React.ReactNode },
-  { hasError: boolean; error: Error | null }
-> {
-  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Map component error:', error);
-    console.error('Error info:', errorInfo);
-    console.error('Error stack:', error.stack);
-  }
-
-  handleRetry = () => {
-    this.setState({ hasError: false, error: null });
-  };
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className={`rounded-xl border p-6 ${this.props.fallback ? '' : 'bg-slate-800 border-slate-700'}`}>
-          <div className="space-y-3">
-            <div>
-              <p className="text-sm font-medium text-slate-300 mb-1">
-                Map temporarily unavailable
-              </p>
-              <p className="text-xs text-slate-400 mb-3">
-                {this.state.error?.message || 'An error occurred while loading the map'}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={this.handleRetry}
-                className="px-4 py-2 text-sm font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700 transition-colors"
-              >
-                Retry
-              </button>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 text-sm font-medium rounded-md bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors"
-              >
-                Refresh Page
-              </button>
-            </div>
-            <details className="text-xs text-slate-500 mt-3">
-              <summary className="cursor-pointer hover:text-slate-400">Show error details</summary>
-              <pre className="mt-2 p-2 bg-slate-900 rounded text-xs overflow-auto max-h-32">
-                {this.state.error?.stack || 'No stack trace available'}
-              </pre>
-            </details>
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
+import DelhiAirMap from '@/components/DelhiAirMap';
 type TabType = 'overview' | 'health' ;
 type TimeRange = 1 | 24 | 48;
 
@@ -109,49 +29,45 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [activeNav, setActiveNav] = useState('dashboard');
   
-  // Data states
+  // Data states - ONLY real API data
   const [liveData, setLiveData] = useState<LivePredictionResponse | null>(null);
   const [forecastData, setForecastData] = useState<PredictResponse | null>(null);
   const [healthStatus, setHealthStatus] = useState<ModelHealthResponse | null>(null);
   const [modelDetail, setModelDetail] = useState<ModelDetailResponse | null>(null);
-  const [pollutantMetrics, setPollutantMetrics] = useState<PollutantMetrics | null>(null);
-  const [csvData, setCsvData] = useState<CSVRow[]>([]);
-  const [csvLoading, setCsvLoading] = useState(true);
   
-  // Gas selection states
+  // Gas selection states - ONLY O3 and NO2 (what API provides)
   const [selectedGas, setSelectedGas] = useState<string | null>(null);
   const [visibleGases, setVisibleGases] = useState<Set<string>>(new Set([
     'O₃ (ppb)',
     'NO₂ (ppb)',
-    'HCHO (ppb)',
-    'CO (ppm)',
-    'PM2.5 (µg/m³)',
-    'PM10 (µg/m³)'
   ]));
 
-  // Fetch all data
+  // Fetch all data - ONLY REAL API DATA, NO DUMMY VALUES
   const fetchAllData = async (siteId: number, hours: TimeRange = 24) => {
     try {
       setLoading(true);
       setError(null);
 
-      const [live, forecast, health, detail, metrics] = await Promise.all([
-        Promise.resolve(generateDummyLivePrediction(siteId)),
-        Promise.resolve(generateDummy24HourForecast(siteId, hours)),
-        Promise.resolve(generateDummyHealthStatus()),
-        Promise.resolve(generateDummyModelDetail(siteId)),
-        Promise.resolve(generateDummyPollutantMetrics()),
-      ]);
+      // Fetch ONLY from backend API - NO fallback to dummy data
+      const liveData = await apiClient.livePredictionSite(siteId);
+      const forecastData = await apiClient.livePrediction24hSite(siteId);
+      const healthData = await apiClient.healthCheckModels();
+      const modelData = await apiClient.healthCheckModelDetail(siteId);
 
-      setLiveData(live);
-      setForecastData(forecast);
-      setHealthStatus(health);
-      setModelDetail(detail);
-      setPollutantMetrics(metrics);
+      setLiveData(liveData);
+      setForecastData(forecastData as unknown as PredictResponse);
+      setHealthStatus(healthData);
+      setModelDetail(modelData);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch data';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch data from backend';
+      console.error('Error fetching data:', err);
       setError(errorMessage);
-      console.error('Error:', err);
+      
+      // NO FALLBACK - show error instead of dummy data
+      setLiveData(null);
+      setForecastData(null);
+      setHealthStatus(null);
+      setModelDetail(null);
     } finally {
       setLoading(false);
     }
@@ -172,105 +88,36 @@ export default function Dashboard() {
     }
   }, [activeNav]);
 
-  // Load CSV data
-  useEffect(() => {
-    const loadCSVData = async () => {
-      try {
-        setCsvLoading(true);
-        const data = await parseCSV('/site_1_train_data.csv');
-        setCsvData(data);
-      } catch (err) {
-        console.error('Error loading CSV:', err);
-        setError('Failed to load CSV data');
-      } finally {
-        setCsvLoading(false);
-      }
-    };
-    loadCSVData();
-  }, []);
-
-  // Initial fetch
+  // Initial fetch - NO CSV LOADING
   useEffect(() => {
     fetchAllData(selectedSite, timeRange);
   }, [selectedSite, timeRange]);
 
-  // Generate trend chart data from CSV
+  // Generate trend data from API forecast data ONLY
   const generateTrendData = () => {
-    if (csvData.length === 0) {
-      // Fallback to dummy data if CSV not loaded
-      const hours = timeRange;
-      const now = new Date();
-      const data = [];
-
-      for (let i = 0; i < hours; i++) {
-        const hour = (now.getHours() + i) % 24;
-        const timeOfDay = hour / 24;
-        const o3Base = Math.sin((timeOfDay - 0.25) * Math.PI);
-        const o3Value = 35 + (o3Base * 40 + 20) + (Math.random() - 0.5) * 10;
-        const no2Morning = Math.sin((timeOfDay - 0.2) * Math.PI * 2) * 30;
-        const no2Evening = Math.sin((timeOfDay - 0.8) * Math.PI * 2) * 35;
-        const no2Value = 50 + (no2Morning + no2Evening) / 2 + (Math.random() - 0.5) * 8;
-        const pm25Base = Math.cos(timeOfDay * Math.PI * 2) * 0.5 + 0.5;
-        const pm25Value = 35 + pm25Base * 60 + (Math.random() - 0.5) * 12;
-        const pm10Value = 65 + pm25Base * 90 + (Math.random() - 0.5) * 15;
-        const hchoValue = 10 + (Math.random() - 0.5) * 2;
-        const coValue = 50 + (Math.random() - 0.5) * 20;
-
-        // For 48-hour data, add "Day 1" or "Day 2" prefix to ensure unique labels
-        let timeLabel = `${String(hour).padStart(2, '0')}:00`;
-        if (hours === 48) {
-          const day = Math.floor(i / 24) + 1;
-          timeLabel = `Day ${day} ${timeLabel}`;
-        }
-
-        data.push({
-          time: timeLabel,
-          O3: Math.max(5, Math.round(o3Value* 10) / 10),
-          NO2: Math.max(10, Math.round(no2Value* 10) / 10),
-          HCHO: Math.max(1, Math.round(hchoValue* 10) / 10),
-          CO: Math.max(100, Math.round(coValue * 10) / 10),
-          PM25: Math.max(5, Math.round(pm25Value * 10) / 10),
-          PM10: Math.max(10, Math.round(pm10Value * 10) / 10),
-        });
-      }
-      return data;
+    if (!forecastData || !forecastData.predictions || forecastData.predictions.length === 0) {
+      return []; // No dummy data
     }
 
-    // Use CSV data - take the last N hours based on timeRange
-    const limit = timeRange === 1 ? 1 : timeRange === 24 ? 24 : 48;
-    const chartData = convertToChartData(csvData, limit);
-    
-    // If CSV doesn't have all gases, fill missing ones with generated values
-    // Note: CSV has O3_target, NO2_target, and sometimes HCHO_satellite
-    // CO, PM25, PM10 are not in the CSV, so we generate them
-    // Note: convertToChartData already handles Day 1/Day 2 prefixes for 48-hour data
-    return chartData.map((d, idx) => {
-      const baseHour = idx % 24;
-      const timeOfDay = baseHour / 24;
-      const pm25Base = Math.cos(timeOfDay * Math.PI * 2) * 0.5 + 0.5;
+    // Use actual forecast data from API
+    return forecastData.predictions.map((pred) => {
+      const hour = Math.floor(pred.hour || 0);
+      const timeStr = `${String(hour).padStart(2, '0')}:00`;
       
-      // Generate values for gases not in CSV (CO, PM25, PM10)
-      // For HCHO, use CSV value if available, otherwise generate
       return {
-        ...d,
-        CO: d.CO > 0 ? d.CO : Math.max(100, Math.round((50 + (Math.random() - 0.5) * 20) * 10) / 10),
-        PM25: d.PM25 > 0 ? d.PM25 : Math.max(5, Math.round((35 + pm25Base * 60 + (Math.random() - 0.5) * 12) * 10) / 10),
-        PM10: d.PM10 > 0 ? d.PM10 : Math.max(10, Math.round((65 + pm25Base * 90 + (Math.random() - 0.5) * 15) * 10) / 10),
-        HCHO: d.HCHO > 0 ? d.HCHO : Math.max(1, Math.round((10 + (Math.random() - 0.5) * 2) * 10) / 10),
+        time: timeStr,
+        O3: pred.O3_target || 0,
+        NO2: pred.NO2_target || 0,
       };
     });
   };
 
   const trendData = generateTrendData();
 
-  // Gas definitions
+  // Gas definitions - ONLY O3 and NO2 (what the backend provides)
   const gasDefinitions = [
     { id: 'O₃ (ppb)', key: 'O3', color: '#06b6d4', label: 'O₃' },
     { id: 'NO₂ (ppb)', key: 'NO2', color: '#2563eb', label: 'NO₂' },
-    { id: 'HCHO (ppb)', key: 'HCHO', color: '#10b981', label: 'HCHO' },
-    { id: 'CO (ppm)', key: 'CO', color: '#f59e0b', label: 'CO' },
-    { id: 'PM2.5 (µg/m³)', key: 'PM25', color: '#f97316', label: 'PM2.5' },
-    { id: 'PM10 (µg/m³)', key: 'PM10', color: '#ef4444', label: 'PM10' },
   ];
 
   // Helper function to convert hex to rgba
@@ -321,23 +168,24 @@ export default function Dashboard() {
   };
 
 
+  // Helper to safely format numeric values
+  const fmt = (value: number | undefined | null, digits = 1) =>
+    typeof value === 'number' ? value.toFixed(digits) : 'N/A';
+
   return (
-    <div className={`flex h-screen ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'}`}>
+    <div className={`flex flex-col flex-1 ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'}`}>
+      <Header 
+        title="Air Quality Overview"
+        subtitle="Current gases levels across all 7 regions of Delhi."
+        onRefresh={handleRefresh}
+        loading={loading}
+        showRefresh={true}
+        theme={theme}
+        onThemeToggle={toggleTheme}
+      />
       
-      {/* Main Content */}
-      <main className="flex-1 ">
-        <Header 
-          title="Air Quality Overview"
-          subtitle="Current gases levels across all 7 regions of Delhi."
-          onRefresh={handleRefresh}
-          loading={loading}
-          showRefresh={true}
-          theme={theme}
-          onThemeToggle={toggleTheme}
-        />
-        
-        {/* Content */}
-        <div className={`p-8 ${theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'}`}>
+      {/* Content */}
+      <div className={`p-8 ${theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'}`}>
           {error && (
             <div className={`mb-6 p-4 border rounded-lg flex items-start gap-3 ${theme === 'dark' ? 'bg-red-900/20 border-red-700' : 'bg-red-50 border-red-300'}`}>
               <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${theme === 'dark' ? 'text-red-500' : 'text-red-600'}`} />
@@ -360,30 +208,30 @@ export default function Dashboard() {
               {/* Tab Content */}
               {activeTab === 'overview' && (
                 <div className="space-y-6">
-                  {/* Current Air Pollution Data */}
+                  {/* Current Air Pollution Data - ONLY O3 and NO2 from API */}
                   {liveData && (
                     <div className="space-y-4">
                       <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                        Current Air Pollution Data
+                        Current Air Pollution Data (Live Predictions)
                       </h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* NO2 Cards - Sentinel-5P OFFL */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* NO2 Card */}
                         <div className={`relative rounded-lg border p-5 shadow-sm transition-all hover:shadow-md ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                           <div className="absolute top-4 right-4">
                             <CheckCircle2 className="w-6 h-6 text-green-500" />
                           </div>
                           <div className="flex items-center gap-3 mb-3">
-                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-red-500/20' : 'bg-red-50'}`}>
-                              <Car className="w-6 h-6 text-red-500" />
+                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-blue-500/20' : 'bg-blue-50'}`}>
+                              <Car className="w-6 h-6 text-blue-500" />
                             </div>
                             <div>
                               <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>NO₂</h3>
-                              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Sentinel-5P OFFL</p>
+                              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Nitrogen Dioxide</p>
                             </div>
                           </div>
                           <div className="mt-4">
                             <div className="flex items-baseline gap-2 mb-2">
-                              <span className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                              <span className={`text-4xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
                                 {liveData.predictions[0].NO2_target.toFixed(1)}
                               </span>
                               <span className={`text-sm font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -394,132 +242,24 @@ export default function Dashboard() {
                           </div>
                         </div>
 
-                        {/* NO2 Cards - Sentinel-5P NRTI */}
+                        {/* O3 Card */}
                         <div className={`relative rounded-lg border p-5 shadow-sm transition-all hover:shadow-md ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                           <div className="absolute top-4 right-4">
                             <CheckCircle2 className="w-6 h-6 text-green-500" />
                           </div>
                           <div className="flex items-center gap-3 mb-3">
-                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-red-500/20' : 'bg-red-50'}`}>
-                              <Car className="w-6 h-6 text-red-500" />
-                            </div>
-                            <div>
-                              <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>NO₂</h3>
-                              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Sentinel-5P NRTI</p>
-                            </div>
-                          </div>
-                          <div className="mt-4">
-                            <div className="flex items-baseline gap-2 mb-2">
-                              <span className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
-                                {liveData.predictions[0].NO2_target.toFixed(1)}
-                              </span>
-                              <span className={`text-sm font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                                µg/m³
-                              </span>
-                            </div>
-                            <p className={`text-base font-semibold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>Good</p>
-                          </div>
-                        </div>
-
-                        {/* O3 Card - Sentinel-5P OFFL */}
-                        <div className={`relative rounded-lg border p-5 shadow-sm transition-all hover:shadow-md ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                          <div className="absolute top-4 right-4">
-                            <CheckCircle2 className="w-6 h-6 text-green-500" />
-                          </div>
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-red-500/20' : 'bg-red-50'}`}>
-                              <Car className="w-6 h-6 text-red-500" />
+                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-cyan-500/20' : 'bg-cyan-50'}`}>
+                              <Car className="w-6 h-6 text-cyan-500" />
                             </div>
                             <div>
                               <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>O₃</h3>
-                              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Sentinel-5P OFFL</p>
+                              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Ozone</p>
                             </div>
                           </div>
                           <div className="mt-4">
                             <div className="flex items-baseline gap-2 mb-2">
-                              <span className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                              <span className={`text-4xl font-bold ${theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600'}`}>
                                 {liveData.predictions[0].O3_target.toFixed(1)}
-                              </span>
-                              <span className={`text-sm font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                                µg/m³
-                              </span>
-                            </div>
-                            <p className={`text-base font-semibold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>Good</p>
-                          </div>
-                        </div>
-
-                        {/* O3 Card - Sentinel-5P NRTI */}
-                        <div className={`relative rounded-lg border p-5 shadow-sm transition-all hover:shadow-md ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                          <div className="absolute top-4 right-4">
-                            <CheckCircle2 className="w-6 h-6 text-green-500" />
-                          </div>
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-red-500/20' : 'bg-red-50'}`}>
-                              <Car className="w-6 h-6 text-red-500" />
-                            </div>
-                            <div>
-                              <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>O₃</h3>
-                              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Sentinel-5P NRTI</p>
-                            </div>
-                          </div>
-                          <div className="mt-4">
-                            <div className="flex items-baseline gap-2 mb-2">
-                              <span className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
-                                {liveData.predictions[0].O3_target.toFixed(1)}
-                              </span>
-                              <span className={`text-sm font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                                µg/m³
-                              </span>
-                            </div>
-                            <p className={`text-base font-semibold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>Good</p>
-                          </div>
-                        </div>
-
-                        {/* PM2.5 Card - Sentinel-5P OFFL */}
-                        <div className={`relative rounded-lg border p-5 shadow-sm transition-all hover:shadow-md ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                          <div className="absolute top-4 right-4">
-                            <CheckCircle2 className="w-6 h-6 text-green-500" />
-                          </div>
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-red-500/20' : 'bg-red-50'}`}>
-                              <Car className="w-6 h-6 text-red-500" />
-                            </div>
-                            <div>
-                              <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>PM₂.₅</h3>
-                              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Sentinel-5P OFFL</p>
-                            </div>
-                          </div>
-                          <div className="mt-4">
-                            <div className="flex items-baseline gap-2 mb-2">
-                              <span className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
-                                {liveData.predictions[0].PM25_target.toFixed(1)}
-                              </span>
-                              <span className={`text-sm font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                                µg/m³
-                              </span>
-                            </div>
-                            <p className={`text-base font-semibold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>Good</p>
-                          </div>
-                        </div>
-
-                        {/* PM2.5 Card - Sentinel-5P NRTI */}
-                        <div className={`relative rounded-lg border p-5 shadow-sm transition-all hover:shadow-md ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                          <div className="absolute top-4 right-4">
-                            <CheckCircle2 className="w-6 h-6 text-green-500" />
-                          </div>
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-red-500/20' : 'bg-red-50'}`}>
-                              <Car className="w-6 h-6 text-red-500" />
-                            </div>
-                            <div>
-                              <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>PM₂.₅</h3>
-                              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Sentinel-5P NRTI</p>
-                            </div>
-                          </div>
-                          <div className="mt-4">
-                            <div className="flex items-baseline gap-2 mb-2">
-                              <span className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
-                                {liveData.predictions[0].PM25_target.toFixed(1)}
                               </span>
                               <span className={`text-sm font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
                                 µg/m³
@@ -842,39 +582,20 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Pollutant Gauges Grid - FIXED HERE */}
+                  {/* Pollutant Gauges Grid - ONLY O3 and NO2 from API */}
                   <div>
                     <h2 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Today's AQI</h2>
-                    {/* UPDATED GRID CLASS below for better spacing */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-                      {pollutantMetrics && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                      {liveData && liveData.predictions && liveData.predictions.length > 0 && (
                         <>
-                          <PollutantGauge name="O₃" value={liveData?.predictions[0].O3_target || 0} maxValue={150} unit="ppb" color="#06b6d4" />  
-                          <PollutantGauge name="NO₂" value={liveData?.predictions[0].NO2_target || 0} maxValue={200} unit="ppb" color="#3b82f6" />
-                          <PollutantGauge name="HCHO" value={liveData?.predictions[0].HCHO_target || 0} maxValue={150} unit="ppb" color="#fbbf24" />
-                          <PollutantGauge name="CO" value={liveData?.predictions[0].CO_target || 0} maxValue={5000} unit="ppm" color="#ef4444" />
-                          <PollutantGauge name="PM2.5" value={liveData?.predictions[0].PM25_target || 0} maxValue={150} unit="µg/m³" color="#f59e0b" />
-                          <PollutantGauge name="PM10" value={liveData?.predictions[0].PM10_target || 0} maxValue={250} unit="µg/m³" color="#f97316" />
-                          </>
+                          <PollutantGauge name="O₃" value={liveData.predictions[0].O3_target || 0} maxValue={150} unit="µg/m³" color="#06b6d4" />  
+                          <PollutantGauge name="NO₂" value={liveData.predictions[0].NO2_target || 0} maxValue={200} unit="µg/m³" color="#3b82f6" />
+                        </>
                       )}
                     </div>
                   </div>
 
-                  {/* Highest Pollutants */}
-                  <HighestPollutants
-                    o3Events={[
-                      { name: 'Central', location: 'Delhi/National Capital Region', value: '85 µg/m³' },
-                      { name: 'East', location: 'Delhi/National Capital Region', value: '82 µg/m³' },
-                      { name: 'South', location: 'Delhi/National Capital Region', value: '78 µg/m³' },
-                    ]}
-                    no2Events={[
-                      { name: 'Central', location: 'Delhi/National Capital Region', value: '95 µg/m³' },
-                      { name: 'North', location: 'Delhi/National Capital Region', value: '92 µg/m³' },
-                      { name: 'West', location: 'Delhi/National Capital Region', value: '88 µg/m³' },
-                    ]}
-                  />
-
-                  {/* Station Info */}
+                  {/* Station Info - from live API data */}
                   {liveData?.live_source && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className={`rounded-xl border p-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
@@ -913,8 +634,7 @@ export default function Dashboard() {
               )}
             </>
           )}
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

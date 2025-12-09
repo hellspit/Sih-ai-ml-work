@@ -58,6 +58,80 @@ const pollutantRanges: Record<Pollutant, { min: number; max: number; color: stri
   NO2: { min: 0, max: 200, color: '#f97316', icon: <Flame className="w-4 h-4" /> },
 };
 
+// Fix marker icons for Vite builds
+const DefaultIcon = L.icon({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+const HeatLayer: React.FC<{
+  points: Array<[number, number, number]>;
+  radius?: number;
+  blur?: number;
+  gradient?: Record<string, string>;
+}> = ({ points, radius = 28, blur = 18, gradient }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+    const layer = (L as any).heatLayer(points, {
+      radius,
+      blur,
+      maxZoom: 17,
+      minOpacity: 0.15,
+      gradient,
+    });
+    layer.addTo(map);
+    return () => {
+      map.removeLayer(layer);
+    };
+  }, [map, points, radius, blur, gradient]);
+
+  return null;
+};
+
+// Component to fit map bounds to show all markers
+const FitBounds: React.FC<{ sites: SiteReading[] }> = ({ sites }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map || sites.length === 0) return;
+
+    // Defer until map is ready and has size to avoid _leaflet_pos errors
+    const doFit = () => {
+      if (!map || sites.length === 0) return;
+      const size = map.getSize();
+      if (!size || size.x === 0 || size.y === 0) return; // skip if container not laid out yet
+
+      const bounds = L.latLngBounds(
+        sites.map(site => [site.lat, site.lon] as LatLngTuple)
+      );
+
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 12,
+      });
+    };
+
+    map.whenReady(() => {
+      // small timeout to ensure layout pass completed
+      setTimeout(doFit, 50);
+    });
+
+    return () => {
+      // no cleanup needed
+    };
+  }, [map, sites]);
+
+  return null;
+};
+
 export default function DelhiAirMap({ sites, onRefresh }: DelhiAirMapProps) {
   const { theme } = useTheme();
   const [dataset, setDataset] = useState<Dataset>('actual');
