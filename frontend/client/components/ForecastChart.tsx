@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
-import HourlyDetailChart from '@/components/HourlyDetailChart';
+//import HourlyDetailChart from '@/components/HourlyDetailChart';
 
 interface ForecastChartProps {
   data: PredictResponse;
@@ -134,13 +134,13 @@ export default function ForecastChart({ data, siteId, timeRange = 24 }: Forecast
           </LineChart>
         </ResponsiveContainer>
       </Card>
-
-      {/* Hourly Detail Chart */}
+{/* 
+      Hourly Detail Chart
       {selectedHour !== null && (
         <HourlyDetailChart hour={selectedHour} data={[]} />
-      )}
+      )} */}
 
-      {/* Hour Selector Section */}
+      {/* Hour Selector Section
       <Card className={`p-6 border ${theme === 'dark' ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white shadow-sm'}`}>
         <h3 className={`font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Select Hour for Detailed Report</h3>
         <div className="mb-4">
@@ -209,7 +209,7 @@ export default function ForecastChart({ data, siteId, timeRange = 24 }: Forecast
             })()}
           </div>
         )}
-      </Card>
+      </Card> */}
     </div>
   );
 }
