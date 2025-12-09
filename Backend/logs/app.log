@@ -1069,3 +1069,100 @@ requests.exceptions.ConnectionError: HTTPSConnectionPool(host='api.waqi.info', p
 2025-12-08 03:16:22 - app.main - INFO - Successfully pre-loaded 8 model(s)
 2025-12-08 03:16:26 - app.api.predict - WARNING - No data found for the last 30 days from TODAY 2025-12-08. CSV data may be older than the requested date range.
 2025-12-08 03:16:48 - app.api.predict - WARNING - No data found for the last 30 days from TODAY 2025-12-08. CSV data may be older than the requested date range.
+2025-12-08 20:35:44 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 20:35:44 - app.main - INFO - Loading models...
+2025-12-08 20:35:44 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 20:35:44 - app.main - WARNING - Could not pre-load model for site 1: No module named 'xgboost'. Will load on-demand.
+2025-12-08 20:35:44 - app.main - WARNING - Could not pre-load model for site 2: No module named 'xgboost'. Will load on-demand.
+2025-12-08 20:35:44 - app.main - WARNING - Could not pre-load model for site 3: No module named 'xgboost'. Will load on-demand.
+2025-12-08 20:35:44 - app.main - WARNING - Could not pre-load model for site 4: No module named 'xgboost'. Will load on-demand.
+2025-12-08 20:35:44 - app.main - WARNING - Could not pre-load model for site 5: No module named 'xgboost'. Will load on-demand.
+2025-12-08 20:35:44 - app.main - WARNING - Could not pre-load model for site 6: No module named 'xgboost'. Will load on-demand.
+2025-12-08 20:35:44 - app.main - WARNING - Could not pre-load model for site 7: No module named 'xgboost'. Will load on-demand.
+2025-12-08 20:35:44 - app.main - WARNING - Could not pre-load unified model: No module named 'xgboost'. Will load on-demand.
+2025-12-08 20:35:44 - app.main - INFO - Models will be loaded on-demand when first request is made
+2025-12-08 20:56:12 - app.api.predict - ERROR - Error generating live prediction: No module named 'xgboost'
+Traceback (most recent call last):
+  File "/home/dungeon/Projects/Sih-ai-ml-work/Backend/app/api/predict.py", line 209, in predict_live_site
+    predictions = prediction_service.predict_from_dict(
+  File "/home/dungeon/Projects/Sih-ai-ml-work/Backend/app/services/prediction_service.py", line 228, in predict_from_dict
+    predictions_df = self.predict(df, site_id, forecast_hours)
+  File "/home/dungeon/Projects/Sih-ai-ml-work/Backend/app/services/prediction_service.py", line 164, in predict
+    model_data = self.model_loader.load_models(site_id)
+  File "/home/dungeon/Projects/Sih-ai-ml-work/Backend/app/models/loader.py", line 99, in load_models
+    model_data = joblib.load(model_path)
+  File "/home/dungeon/Projects/Sih-ai-ml-work/Backend/venv/lib/python3.10/site-packages/joblib/numpy_pickle.py", line 749, in load
+    obj = _unpickle(
+  File "/home/dungeon/Projects/Sih-ai-ml-work/Backend/venv/lib/python3.10/site-packages/joblib/numpy_pickle.py", line 626, in _unpickle
+    obj = unpickler.load()
+  File "/usr/lib/python3.10/pickle.py", line 1213, in load
+    dispatch[key[0]](self)
+  File "/usr/lib/python3.10/pickle.py", line 1538, in load_stack_global
+    self.append(self.find_class(module, name))
+  File "/usr/lib/python3.10/pickle.py", line 1580, in find_class
+    __import__(module, level=0)
+ModuleNotFoundError: No module named 'xgboost'
+2025-12-08 20:57:16 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-08 21:00:53 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-08 21:00:53 - app.main - INFO - Loading models...
+2025-12-08 21:00:53 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-08 21:00:53 - app.main - INFO - Loaded model for site 1
+2025-12-08 21:00:53 - app.main - INFO - Loaded model for site 2
+2025-12-08 21:00:53 - app.main - INFO - Loaded model for site 3
+2025-12-08 21:00:53 - app.main - INFO - Loaded model for site 4
+2025-12-08 21:00:53 - app.main - INFO - Loaded model for site 5
+2025-12-08 21:00:53 - app.main - INFO - Loaded model for site 6
+2025-12-08 21:00:53 - app.main - INFO - Loaded model for site 7
+2025-12-08 21:00:53 - app.main - INFO - Loaded unified model
+2025-12-08 21:00:53 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-08 21:01:14 - app.api.predict - WARNING - No data found for the last 7 days from TODAY 2025-12-08. CSV data may be older than the requested date range.
+2025-12-09 13:43:40 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-09 13:43:40 - app.main - INFO - Loading models...
+2025-12-09 13:43:40 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-09 13:43:41 - app.main - INFO - Loaded model for site 1
+2025-12-09 13:43:41 - app.main - INFO - Loaded model for site 2
+2025-12-09 13:43:41 - app.main - INFO - Loaded model for site 3
+2025-12-09 13:43:41 - app.main - INFO - Loaded model for site 4
+2025-12-09 13:43:41 - app.main - INFO - Loaded model for site 5
+2025-12-09 13:43:41 - app.main - INFO - Loaded model for site 6
+2025-12-09 13:43:41 - app.main - INFO - Loaded model for site 7
+2025-12-09 13:43:41 - app.main - INFO - Loaded unified model
+2025-12-09 13:43:41 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-09 13:50:08 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-09 13:50:12 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-09 13:50:12 - app.main - INFO - Loading models...
+2025-12-09 13:50:12 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-09 13:50:13 - app.main - INFO - Loaded model for site 1
+2025-12-09 13:50:13 - app.main - INFO - Loaded model for site 2
+2025-12-09 13:50:13 - app.main - INFO - Loaded model for site 3
+2025-12-09 13:50:13 - app.main - INFO - Loaded model for site 4
+2025-12-09 13:50:13 - app.main - INFO - Loaded model for site 5
+2025-12-09 13:50:13 - app.main - INFO - Loaded model for site 6
+2025-12-09 13:50:13 - app.main - INFO - Loaded model for site 7
+2025-12-09 13:50:13 - app.main - INFO - Loaded unified model
+2025-12-09 13:50:13 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-09 13:51:02 - app.main - INFO - Shutting down Air Pollution Forecasting API...
+2025-12-09 13:51:02 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-09 13:51:02 - app.main - INFO - Loading models...
+2025-12-09 13:51:02 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-09 13:51:03 - app.main - INFO - Loaded model for site 1
+2025-12-09 13:51:03 - app.main - INFO - Loaded model for site 2
+2025-12-09 13:51:03 - app.main - INFO - Loaded model for site 3
+2025-12-09 13:51:03 - app.main - INFO - Loaded model for site 4
+2025-12-09 13:51:03 - app.main - INFO - Loaded model for site 5
+2025-12-09 13:51:03 - app.main - INFO - Loaded model for site 6
+2025-12-09 13:51:03 - app.main - INFO - Loaded model for site 7
+2025-12-09 13:51:03 - app.main - INFO - Loaded unified model
+2025-12-09 13:51:03 - app.main - INFO - Successfully pre-loaded 8 model(s)
+2025-12-09 16:44:09 - app.main - INFO - Starting Air Pollution Forecasting API...
+2025-12-09 16:44:09 - app.main - INFO - Loading models...
+2025-12-09 16:44:09 - app.main - INFO - Pre-loading models (optional - will load on-demand if skipped)...
+2025-12-09 16:44:09 - app.main - INFO - Loaded model for site 1
+2025-12-09 16:44:09 - app.main - INFO - Loaded model for site 2
+2025-12-09 16:44:09 - app.main - INFO - Loaded model for site 3
+2025-12-09 16:44:09 - app.main - INFO - Loaded model for site 4
+2025-12-09 16:44:10 - app.main - INFO - Loaded model for site 5
+2025-12-09 16:44:10 - app.main - INFO - Loaded model for site 6
+2025-12-09 16:44:10 - app.main - INFO - Loaded model for site 7
+2025-12-09 16:44:10 - app.main - INFO - Loaded unified model
+2025-12-09 16:44:10 - app.main - INFO - Successfully pre-loaded 8 model(s)
